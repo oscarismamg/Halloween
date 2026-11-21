@@ -1,3 +1,50 @@
+# 🎉 Noches de Fiesta: Halloween 🎃 y Posada 🎄
+
+Este repo tiene dos web apps de juegos para la TV:
+
+| App | Enlace | Estilo |
+|---|---|---|
+| 🎄 **Noche de Posada** | `https://oscarismamg.github.io/Halloween/posada/` | Tipo Jackbox: cada celular es un control que manda respuestas, votos y botonazos en tiempo real |
+| 🎃 **Noche de Halloween** | `https://oscarismamg.github.io/Halloween/` | Roles secretos por QR (funciona sin servidor) |
+
+---
+
+# 🎄 Noche de Posada
+
+## Cómo se juega
+1. En tu iPhone abre **`…/Halloween/posada/`** en Safari, toca **"¡Pásele, pásele!"** y duplica la pantalla en la TV.
+2. La TV muestra un **QR** y un **código de sala** de 4 letras. Cada invitado lo escanea, escribe su nombre y su celular se vuelve su control. Pueden entrar o salir cuando quieran.
+3. Elige un juego del menú. En cada juego puedes sacar a quien no quiera jugar.
+
+> **Requiere internet** en la TV y en todos los celulares. Lo ideal es que todos estén en el WiFi de la casa. La conexión es directa entre celulares (WebRTC con PeerJS): gratis, sin cuentas y sin instalar nada. Si alguien bloquea su celular o se le cierra la página, al volver se reconecta solo y recupera su pantalla.
+
+### 🎯 100 Posaderos Dijeron
+Al estilo de 100 Mexicanos Dijeron, con 28 preguntas en tono picosito.
+- Alguien hace de **🎤 conductor**: ve las respuestas en su celular y las destapa en la TV conforme las digan (aunque las digan con otras palabras). El conductor no juega.
+- **Cara a cara:** un jugador de cada equipo (🫔 Los Tamales vs ☕ Los Champurrados). El primero que aprieta **¡BASTA!** en su celular contesta.
+- **Control:** el equipo ganador contesta por turnos. Su celular avisa "¡TE TOCA!".
+- **3 taches ❌** y el otro equipo puede **robar** con una sola respuesta.
+- Las últimas rondas valen **doble y triple**. El equipo ganador recibe +3 en el marcador de la noche.
+- 🛟 Si el conductor se desconecta, en la TV hay un botón de **control manual** (pero muestra las respuestas en pantalla).
+
+### 😂 Respuestas Chuscas
+Al estilo de Quiplash, con más de 90 frases en tono picosito.
+- A cada quien le llegan **2 frases** para completar en su celular, con lo más chistoso posible.
+- En la TV se enfrentan las respuestas de dos en dos, **sin decir de quién son**, y la voz las lee en voz alta.
+- Todos votan desde el celular. Si alguien se lleva todos los votos: **🌶️ ¡CHUSCAZO!** con puntos extra.
+- Son 2 rondas (la segunda vale doble) y una **ronda final** donde todos contestan la misma frase.
+- Quien no juegue puede votar como público. Al final: 🥇 +3, 🥈 +2 y 🥉 +1 en el marcador de la noche.
+
+**Marcador → 👑 Coronación** para coronar al Rey o Reina de la Posada.
+
+### ✏️ Agregar tus propias preguntas
+Todas están en `posada/js/datos-posada.js`. Puedes agregar preguntas de 100 Posaderos (con sus respuestas y puntos) y frases chuscas con chismes del grupo.
+
+### 🔊 Si no se oye en la TV
+Quita el **modo silencio** del iPhone, sube el volumen y en ⚙️ Ajustes toca "Probar sonido". La app fuerza la sesión de audio en modo reproducción para que suene aunque el iPhone esté en silencio.
+
+---
+
 # 🎃 Noche de Halloween
 
 Web app de juegos de fiesta para jugar **todos juntos frente a la TV**. Un iPhone se duplica en la TV con AirPlay y cada invitado usa su propio celular o iPad para ver su rol secreto.
@@ -121,6 +168,6 @@ Al final ve a **🏆 Marcador → 👑 Coronación final** para coronar al **Rey
 - `js/datos.js` tiene todas las palabras, preguntas y retos. **Se puede editar** para agregar los tuyos.
 - Los roles se calculan con una semilla compartida en el QR (`js/comun.js`), así que la TV y los celulares obtienen el mismo resultado sin conexión entre ellos.
 - Jugadores y puntos se guardan en el navegador del iPhone (sobreviven si se recarga la página).
-- QR generado con [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) (MIT).
+- QR generado con [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) (MIT). Conexión en tiempo real con [PeerJS](https://peerjs.com) (MIT).
 
 Para probar en tu compu: `python3 -m http.server` y abre `http://localhost:8000`.

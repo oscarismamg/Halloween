@@ -222,6 +222,48 @@ const Sonido = (() => {
       o.connect(g).connect(maestro);
       o.start(t); lfo.start(t); o.stop(t + 2.4); lfo.stop(t + 2.4);
     },
+    /* ---------- Sonidos de concurso / Navidad ---------- */
+    ding() {
+      const t = ctx.currentTime;
+      [880, 1318.5].forEach((f, i) => tono(f, t + i * 0.12, 0.9, 'sine', 0.35));
+      tono(2637, t + 0.12, 0.5, 'sine', 0.08);
+    },
+    tache() {
+      const t = ctx.currentTime;
+      tono(110, t, 0.9, 'sawtooth', 0.35);
+      tono(116, t, 0.9, 'square', 0.2);
+      tono(55, t, 0.9, 'square', 0.25);
+    },
+    timbre() {
+      const t = ctx.currentTime;
+      for (let i = 0; i < 4; i++) tono(1046, t + i * 0.07, 0.06, 'square', 0.2);
+      tono(1568, t + 0.3, 0.35, 'triangle', 0.3);
+    },
+    cascabeles(dur = 1.2) {
+      const t = ctx.currentTime;
+      for (let i = 0; i < dur * 14; i++) {
+        const b = t + i / 14 + Math.random() * 0.02;
+        const n = ruido(0.08);
+        const f = ctx.createBiquadFilter();
+        f.type = 'bandpass'; f.frequency.value = 6000 + Math.random() * 3000; f.Q.value = 8;
+        const g = ctx.createGain();
+        g.gain.setValueAtTime(0.0001, b);
+        g.gain.exponentialRampToValueAtTime(0.5, b + 0.005);
+        g.gain.exponentialRampToValueAtTime(0.0001, b + 0.08);
+        n.connect(f).connect(g).connect(maestro);
+        n.start(b); n.stop(b + 0.09);
+      }
+    },
+    navidad() {
+      // Primera frase de "Jingle Bells" (dominio público) con cascabeles
+      const t = ctx.currentTime;
+      const E = 659.3, G = 784, C = 523.3, D = 587.3;
+      const notas = [[E, 0, .2], [E, .25, .2], [E, .5, .45], [E, 1, .2], [E, 1.25, .2], [E, 1.5, .45], [E, 2, .2], [G, 2.25, .2], [C, 2.5, .3], [D, 2.85, .12], [E, 3, .8]];
+      notas.forEach(([f, d, l]) => { tono(f, t + d, l, 'triangle', 0.22); tono(f * 2, t + d, l * 0.6, 'sine', 0.05); });
+      [0, .5, 1, 1.5, 2, 2.5, 3].forEach(d => tono(f0(d), t + d, 0.3, 'sine', 0.12));
+      function f0(d) { return d % 1 === 0 ? 130.8 : 196; }
+      ef.cascabeles(3.6);
+    },
     puerta() {
       const t = ctx.currentTime;
       const o = ctx.createOscillator();
