@@ -158,3 +158,56 @@ h1, h2, .titulo-terror {
 .resp-conductor .pts { background: #072257; padding: .1em .5em; border-radius: 8px; }
 .resp-conductor.revelada { background: linear-gradient(180deg, #ffe08a, #f2b53a); color: #2b1600; border-color: #fff3c4; opacity: .75; }
 body.celular input[type=text] { -webkit-user-select: text; user-select: text; }
+
+/* ---------- Menú con muchos juegos ---------- */
+.menu-juegos { grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr)); gap: 1.2vmin; }
+.juego-boton { padding: 1.2vmin 1.4vmin; gap: 1vmin; }
+.juego-boton .icono { font-size: clamp(1.6rem, 5vmin, 3rem); }
+.juego-boton .nombre { font-size: clamp(.95rem, 2.4vmin, 1.4rem); }
+.juego-boton .desc { font-size: clamp(.75rem, 1.7vmin, 1rem); }
+
+/* ---------- Lotería ---------- */
+.carta-loteria {
+  width: min(34vmin, 70vw); aspect-ratio: 2 / 3; margin: 0 auto; position: relative;
+  background: #fffaf0; color: #1d1206; border-radius: 16px; border: 6px solid #c0392b;
+  outline: 3px solid #fffaf0; box-shadow: 0 15px 40px rgba(0, 0, 0, .5);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1vmin;
+}
+.carta-loteria .emoji-carta { font-size: min(18vmin, 36vw); line-height: 1; }
+.carta-loteria .nombre-carta { font-family: var(--fuente-titulo); font-size: clamp(1.4rem, 4.5vmin, 3rem); text-align: center; color: #8a1d12; }
+.carta-loteria .num-carta { position: absolute; top: .4em; left: .6em; font-weight: 900; font-size: clamp(1rem, 3vmin, 1.8rem); }
+.mini-cartas { display: grid; grid-template-columns: repeat(12, 1fr); gap: .6vmin; }
+.mini-carta { font-size: clamp(1rem, 3.4vmin, 2.2rem); text-align: center; opacity: .2; filter: grayscale(1); }
+.mini-carta.salio { opacity: 1; filter: none; }
+.tabla-tv, .tabla-cel { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1vmin; max-width: 640px; width: 100%; margin: 0 auto; }
+.tabla-cel { gap: 6px; }
+.celda-tabla {
+  aspect-ratio: 3 / 4; border-radius: 10px; border: 2px solid #c0392b; background: #fffaf0; color: #1d1206;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; position: relative;
+  font-family: inherit; padding: 2px; cursor: pointer;
+}
+.celda-tabla span { font-size: clamp(1.6rem, 8vw, 2.6rem); line-height: 1; }
+.tabla-tv .celda-tabla span { font-size: clamp(1.4rem, 5vmin, 3rem); }
+.celda-tabla small { font-size: clamp(.55rem, 2.6vw, .8rem); font-weight: 800; text-align: center; line-height: 1.05; }
+.celda-tabla.marcada::after {
+  content: '🫘'; position: absolute; inset: 0; display: grid; place-items: center;
+  font-size: clamp(1.8rem, 9vw, 3rem); background: rgba(120, 60, 20, .35); border-radius: 8px;
+}
+.ultima-carta { text-align: center; font-size: 1.15rem; background: var(--tarjeta); border-radius: 12px; padding: .5em; }
+.boton-loteria { font-size: 1.8rem; width: 100%; }
+
+/* ---------- ¿Quién es más probable? ---------- */
+.barras-votos { display: flex; flex-direction: column; gap: 1vmin; max-width: 1100px; width: 100%; margin: 0 auto; }
+.fila-barra { display: grid; grid-template-columns: minmax(8em, 1fr) 2fr minmax(4em, 1fr); gap: 1em; align-items: center; font-weight: 800; font-size: clamp(1rem, 2.8vmin, 1.8rem); }
+.barra-votos.grande { height: 1.1em; background: rgba(255, 255, 255, .1); }
+
+/* ---------- Mentiras / Villancico ---------- */
+.verdad-txt { color: #3ddc84; border-bottom: 4px solid #3ddc84; font-weight: 900; }
+.emojis-acertijo { text-align: center; font-size: clamp(3.5rem, 18vmin, 11rem); letter-spacing: .1em; line-height: 1.1; }
+
+/* ---------- Piñata ---------- */
+.cuerda { width: 4px; height: 6vh; background: #c9a24a; margin: 0 auto -2vh; }
+.pinata-tv { text-align: center; font-size: clamp(6rem, 30vmin, 18rem); line-height: 1; transition: transform .08s; filter: drop-shadow(0 10px 20px rgba(0,0,0,.5)); }
+.boton-dale { font-size: 2.6rem; user-select: none; -webkit-user-select: none; }
+.boton-dale.golpe { animation: golpe .12s; }
+@keyframes golpe { 50% { transform: scale(.92) rotate(-4deg); } }

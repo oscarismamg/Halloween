@@ -97,6 +97,8 @@ function render() {
   if (v.tipo === 'escribir') return vistaEscribir(v);
   if (v.tipo === 'votar') return vistaVotar(v);
   if (v.tipo === 'conductor') return vistaConductor(v);
+  if (v.tipo === 'tabla') return vistaTabla(v);
+  if (v.tipo === 'dale') return vistaDale(v);
 }
 
 function vistaEspera(v) {
@@ -140,17 +142,18 @@ function vistaBasta(v) {
 function vistaEscribir(v) {
   pintar(`
     <div class="contenido" style="justify-content:flex-start;gap:1rem">
-      <div class="centro tenue">Frase ${v.n} de ${v.total} ✍️</div>
+      <div class="centro tenue">${v.instr ? escaparHTML(v.instr) : `Frase ${v.n} de ${v.total} ✍️`}</div>
       <div class="tarjeta frase-cel">${escaparHTML(v.frase).replace(/_{3,}/g, '<span class="hueco">&nbsp;</span>')}</div>
+      ${v.error ? `<p class="centro aparecer" style="color:var(--naranja2);font-weight:900;margin:0">${escaparHTML(v.error)}</p>` : ''}
       <form id="f" autocomplete="off" style="display:flex;flex-direction:column;gap:1rem">
-        <textarea id="resp" maxlength="80" rows="3" placeholder="Escribe algo chistoso… 😏" class="campo-texto"></textarea>
-        <div class="fila entre"><span class="tenue" id="cuenta">0/80</span><button class="btn grande" type="submit">Enviar 🚀</button></div>
+        <textarea id="resp" maxlength="${v.max || 80}" rows="3" placeholder="${v.instr ? 'Tu mentira… 😈' : 'Escribe algo chistoso… 😏'}" class="campo-texto"></textarea>
+        <div class="fila entre"><span class="tenue" id="cuenta">0/${v.max || 80}</span><button class="btn grande" type="submit">Enviar 🚀</button></div>
       </form>
-      <p class="tenue centro" style="font-size:.95rem">Tip: la gracia es que nadie sepa que fuiste tú 😇</p>
+      <p class="tenue centro" style="font-size:.95rem">${v.instr ? 'Tip: que suene creíble para que caigan 😏' : 'Tip: la gracia es que nadie sepa que fuiste tú 😇'}</p>
     </div>`);
   const t = document.getElementById('resp');
   const c = document.getElementById('cuenta');
-  t.addEventListener('input', () => { c.textContent = `${t.value.length}/80`; });
+  t.addEventListener('input', () => { c.textContent = `${t.value.length}/${v.max || 80}`; });
   setTimeout(() => t.focus(), 100);
   document.getElementById('f').addEventListener('submit', ev => {
     ev.preventDefault();
@@ -197,6 +200,58 @@ function vistaConductor(v) {
     revelar: d => { RedCel.enviar({ t: 'cmd', c: 'revelar', arg: d.i }); vibrar(30); },
     cmd: d => { RedCel.enviar({ t: 'cmd', c: d.c, arg: d.arg }); vibrar(30); }
   });
+}
+
+/* ---------------- Lotería: tabla ---------------- */
+function vistaTabla(v) {
+  const clave = 'lot-' + v.id;
+  const marcadas = new Set(JSON.parse(localStorage.getItem(clave) || '[]'));
+  pintar(`
+    <div class="contenido" style="justify-content:flex-start;gap:.8rem">
+      <div class="fila entre"><span class="etiqueta">🎴 ${escaparHTML(v.modo)}</span><span class="etiqueta">Carta #${v.num}</span></div>
+      <div class="ultima-carta">${v.ultima ? `Salió: <b>${v.ultima.e} ${escaparHTML(v.ultima.n)}</b>` : '¡Corre y se va!'}</div>
+      <div class="tabla-cel">
+        ${v.cartas.map((c, i) => `<button class="celda-tabla ${marcadas.has(i) ? 'marcada' : ''}" data-a="marcar" data-i="${i}"><span>${c.e}</span><small>${escaparHTML(c.n)}</small></button>`).join('')}
+      </div>
+      <button class="btn grande boton-loteria" data-a="loteria">🎉 ¡LOTERÍA!</button>
+      <p class="tenue centro" style="font-size:.9rem;margin:0">Toca una carta para ponerle frijolito 🫘 (o quitárselo)</p>
+    </div>`, {
+    marcar: (d, el) => {
+      const i = +d.i;
+      marcadas.has(i) ? marcadas.delete(i) : marcadas.add(i);
+      localStorage.setItem(clave, JSON.stringify([...marcadas]));
+      el.classList.toggle('marcada');
+      vibrar(15);
+    },
+    loteria: () => { RedCel.enviar({ t: 'loteria', id: v.id, marcadas: [...marcadas] }); vibrar([60, 40, 60]); }
+  });
+}
+
+/* ---------------- Piñata: botón para dar golpes ---------------- */
+let golpesPendientes = 0, golpesTotales = 0, timerGolpes = null;
+function vistaDale(v) {
+  if (vistaDale.id !== v.id) { golpesTotales = 0; vistaDale.id = v.id; }
+  pintar(`
+    <div class="contenido centro">
+      <h2>${v.activo ? '¡DALE, DALE, DALE!' : '¿Listos? 🪅'}</h2>
+      <button class="boton-basta boton-dale ${v.activo ? '' : 'inactivo'}" id="dale" ${v.activo ? '' : 'disabled'}>${v.activo ? '🪅<br>¡DALE!' : '⏳'}</button>
+      <div class="reloj" id="misGolpes" style="font-size:3rem">${golpesTotales}</div>
+      <p class="tenue">golpes</p>
+    </div>`);
+  const b = document.getElementById('dale');
+  if (!v.activo) return;
+  b.addEventListener('pointerdown', ev => {
+    ev.preventDefault();
+    golpesPendientes++; golpesTotales++;
+    const el = document.getElementById('misGolpes'); if (el) el.textContent = golpesTotales;
+    b.classList.remove('golpe'); void b.offsetWidth; b.classList.add('golpe');
+    if (navigator.vibrate) navigator.vibrate(8);
+  });
+  clearInterval(timerGolpes);
+  timerGolpes = setInterval(() => {
+    if (!vista || vista.tipo !== 'dale' || !vista.activo) { clearInterval(timerGolpes); return; }
+    if (golpesPendientes > 0) { const n = Math.min(golpesPendientes, 6); golpesPendientes -= n; RedCel.enviar({ t: 'golpes', id: v.id, n }); }
+  }, 200);
 }
 
 /* ---------------- Arranque ---------------- */

@@ -35,10 +35,48 @@ Al estilo de Quiplash, con más de 90 frases en tono picosito.
 - Son 2 rondas (la segunda vale doble) y una **ronda final** donde todos contestan la misma frase.
 - Quien no juegue puede votar como público. Al final: 🥇 +3, 🥈 +2 y 🥉 +1 en el marcador de la noche.
 
+### 🎴 Lotería Navideña
+36 cartas navideñas con versos chuscos ("El Cuñado: llegó sin traer nada, y se acabó la botellada").
+- Cada quien tiene **su tabla de 16 cartas en el celular** y toca las cartas para ponerles frijolito 🫘.
+- La TV canta las cartas con voz. Puedes pausar o cambiar la velocidad.
+- Se gana con línea, 4 esquinas o tabla llena. El botón **¡LOTERÍA!** se valida solo, y si alguien canta lotería sin tenerla, la TV lo exhibe: "¡Lotería FALSA!". El ganador recibe +3 en el marcador de la noche.
+
+### 👉 ¿Quién es más probable?
+40 preguntas sobre el grupo ("…que diga 'ya me voy' y se quede dos horas más").
+- Todos votan en secreto desde el celular por alguien del grupo.
+- La TV corona al más votado y **revela quién votó por quién**.
+- Quien vota con la mayoría gana puntos por "conocer a su banda".
+
+### 🤥 Mentiras Navideñas
+Al estilo de Fibbage, con 23 datos reales y rarísimos de Navidad.
+- Cada quien inventa una mentira para llenar el hueco. Si escribes la verdad, el celular te avisa y te pide otra.
+- Luego todos buscan la verdad entre las mentiras: encontrarla da +500 y cada persona que cae en tu mentira te da +250.
+
+### 🔔 Adivina el Villancico
+30 acertijos de emojis: villancicos, canciones y películas navideñas.
+- El primero que aprieta **¡BASTA!** contesta en voz alta.
+- El anfitrión marca ✔ o ✖. Si fallas, quedas fuera de ese acertijo. Hay botón de pista 💡.
+
+### 🪅 Rompe la Piñata
+Carrera de toques: todos le pegan desde su celular lo más rápido que puedan.
+- El golpe final se lleva +300 y quien dio más golpes, +100.
+- La vida de la piñata se ajusta a cuántos juegan.
+
+En todos los juegos con puntos, al final el 🥇 recibe +3, el 🥈 +2 y el 🥉 +1 en el marcador de la noche.
+
 **Marcador → 👑 Coronación** para coronar al Rey o Reina de la Posada.
 
+### 🗓️ Orden sugerido para la posada
+1. 🪅 **Rompe la Piñata**, para despertar a todos.
+2. 😂 **Respuestas Chuscas**.
+3. 🎯 **100 Posaderos Dijeron**.
+4. 🍽️ Cena + 🎴 **Lotería Navideña**, que es tranquila y para todas las edades.
+5. 🤥 **Mentiras Navideñas** y 🔔 **Adivina el Villancico**.
+6. 👉 **¿Quién es más probable?**, cuando ya hay confianza 😏.
+7. 👑 **Coronación**.
+
 ### ✏️ Agregar tus propias preguntas
-Todas están en `posada/js/datos-posada.js`. Puedes agregar preguntas de 100 Posaderos (con sus respuestas y puntos) y frases chuscas con chismes del grupo.
+Todo el contenido está en `posada/js/datos-posada.js`: preguntas, frases, cartas de lotería, datos de Mentiras y acertijos. Puedes agregar chismes y apodos del grupo.
 
 ### 🔊 Si no se oye en la TV
 Quita el **modo silencio** del iPhone, sube el volumen y en ⚙️ Ajustes toca "Probar sonido". La app fuerza la sesión de audio en modo reproducción para que suene aunque el iPhone esté en silencio.

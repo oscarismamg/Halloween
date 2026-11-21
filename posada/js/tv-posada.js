@@ -186,9 +186,10 @@ function htmlJugadores(conExpulsar) {
    MENÚ / SALA
    ========================================================= */
 const JUEGOS = [
-  { id: 'posaderos', icono: '🎯', nombre: '100 Posaderos Dijeron', desc: 'Dos equipos, un tablero y el botón de ¡Basta!' },
-  { id: 'chuscas', icono: '😂', nombre: 'Respuestas Chuscas', desc: 'Escribe lo más chistoso y que todos voten' }
+  { id: 'posaderos', icono: '🎯', nombre: '100 Posaderos Dijeron', desc: 'Dos equipos, un tablero y ¡Basta!' },
+  { id: 'chuscas', icono: '😂', nombre: 'Respuestas Chuscas', desc: 'Lo más chistoso gana votos' }
 ];
+const REGISTRO = {}; // id -> objeto con config(); se llena al final de cada juego
 
 function menu() {
   Juego.terminar();
@@ -221,7 +222,7 @@ function menu() {
         <button class="btn secundario" data-a="ajustes">⚙️ Ajustes</button>
       </div>
     </div>`, {
-    juego: d => { Sonido.reproducir('cascabeles'); (d.id === 'posaderos' ? Posaderos : Chuscas).config(); },
+    juego: d => { Sonido.reproducir('cascabeles'); REGISTRO[d.id].config(); },
     marcador: pantallaMarcador,
     ajustes: pantallaAjustes,
     expulsar: d => { if (confirm(`¿Sacar a ${nombre(d.uid)} de la sala? (pierde sus puntos)`)) { RedTV.expulsar(d.uid); delete P.jugadores[d.uid]; P.orden = P.orden.filter(u => u !== d.uid); guardar(); refrescarListas(); } }
@@ -918,6 +919,9 @@ const Chuscas = (() => {
   return { config };
 })();
 
+REGISTRO.posaderos = Posaderos;
+REGISTRO.chuscas = Chuscas;
+
 /* ---------------- Arranque ---------------- */
 function bienvenida() {
   pantalla('bienvenida', `
@@ -934,5 +938,4 @@ function bienvenida() {
     }
   });
 }
-iniciarRed();
-bienvenida();
+window.addEventListener('DOMContentLoaded', () => { iniciarRed(); bienvenida(); });
