@@ -9,7 +9,53 @@ const Sonido = (() => {
   let ambienteNodos = null;
   const config = { efectos: true, voz: true, ambiente: true };
 
+  /* ---------- Truco para iPhone ----------
+     iOS silencia Web Audio cuando el interruptor de silencio está activado.
+     1) Safari 17+: navigator.audioSession.type = 'playback'
+     2) Versiones anteriores: reproducir en bucle un <audio> silencioso
+        cambia la sesión de audio a "reproducción" (como Música),
+        y así los efectos suenan aunque el iPhone esté en silencio
+        y se envían por AirPlay a la TV. */
+  let audioSilencioso = null;
+  function wavSilencioso() {
+    const muestras = 4410; // 0.1 s a 44.1 kHz, 8 bits
+    const buf = new Uint8Array(44 + muestras);
+    const v = new DataView(buf.buffer);
+    const txt = (o, s) => [...s].forEach((c, i) => buf[o + i] = c.charCodeAt(0));
+    txt(0, 'RIFF'); v.setUint32(4, 36 + muestras, true); txt(8, 'WAVE');
+    txt(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+    v.setUint32(24, 44100, true); v.setUint32(28, 44100, true); v.setUint16(32, 1, true); v.setUint16(34, 8, true);
+    txt(36, 'data'); v.setUint32(40, muestras, true);
+    buf.fill(128, 44);
+    let bin = ''; buf.forEach(b => bin += String.fromCharCode(b));
+    return 'data:audio/wav;base64,' + btoa(bin);
+  }
+  function forzarSesionReproduccion() {
+    try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) { }
+    if (!audioSilencioso) {
+      audioSilencioso = document.createElement('audio');
+      audioSilencioso.setAttribute('x-webkit-airplay', 'allow');
+      audioSilencioso.setAttribute('playsinline', '');
+      audioSilencioso.loop = true;
+      audioSilencioso.preload = 'auto';
+      audioSilencioso.src = wavSilencioso();
+      audioSilencioso.style.display = 'none';
+      document.body.appendChild(audioSilencioso);
+    }
+    if (audioSilencioso.paused) {
+      const pr = audioSilencioso.play();
+      if (pr && pr.catch) pr.catch(() => { });
+    }
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && ctx) {
+      if (ctx.state !== 'running') ctx.resume();
+      if (audioSilencioso && audioSilencioso.paused) audioSilencioso.play().catch(() => { });
+    }
+  });
+
   function activar() {
+    forzarSesionReproduccion();
     if (!ctx) {
       const AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) return;
@@ -18,7 +64,7 @@ const Sonido = (() => {
       maestro.gain.value = 0.8;
       maestro.connect(ctx.destination);
     }
-    if (ctx.state === 'suspended') ctx.resume();
+    if (ctx.state !== 'running') ctx.resume();
     // Desbloquear la voz en iOS con un enunciado vacío
     if ('speechSynthesis' in window && !activar.vozLista) {
       const u = new SpeechSynthesisUtterance(' ');

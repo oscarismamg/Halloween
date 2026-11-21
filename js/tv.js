@@ -364,7 +364,7 @@ function pantallaAyuda() {
             <li>Conecta el iPhone al mismo WiFi que la TV.</li>
             <li>Abre el <b>Centro de Control</b> → <b>Duplicar pantalla</b> → elige tu TV.</li>
             <li>Gira el iPhone <b>horizontal</b> (quita el bloqueo de rotación) para que llene la TV.</li>
-            <li>Sube el volumen: la voz y los sonidos salen por la TV 🔊.</li>
+            <li>Sube el volumen: la voz y los sonidos salen por la TV 🔊. Si no se oye nada, quita el modo silencio del iPhone y toca "Probar sonido" en ⚙️ Ajustes.</li>
             <li>Activa <b>No molestar</b> para que no salgan notificaciones en la TV.</li>
           </ol>
           <h3>Para los jugadores</h3>
