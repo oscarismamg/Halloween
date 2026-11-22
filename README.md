@@ -76,6 +76,12 @@ Dado gigante en 3D para dinámicas de robar e intercambiar regalos. Cada quien t
 - **Reglas de candado sugeridas:** un regalo robado 3 veces queda congelado 🔒 y no se vale robar de regreso en el turno inmediato.
 - **Orden sugerido:** primero *Broma Bomba* para calentar y luego *El Gran Robo* con los regalos de $200, cerrando con la ronda relámpago.
 
+### 👥 Jugadores sin celular y modo offline
+- **Registrar sin celular:** en el menú toca **👥 Registrar sin celular** y escribe los nombres. Esas personas (marcadas con 📵) cuentan para turnos, equipos, puntos y coronación.
+  - Juegan en el **Dado de Regalos** (tiran desde la TV), en **100 Posaderos** (contestan en voz alta y el conductor marca quién gana el cara a cara) y salen como opción en **¿Quién es más probable?**.
+  - En los juegos donde hay que escribir o tocar el celular no se incluyen por defecto.
+- **Modo offline:** después de abrir la página una vez con internet, queda guardada en el iPhone. Si se cae el internet, la TV sigue funcionando con jugadores sin celular: Dado de Regalos, 100 Posaderos con 🛟 control manual, marcador y coronación. Los celulares solo pueden unirse con internet.
+
 ### 🤖 Jugadores de prueba
 ¿Quieres probar un juego y no tienes suficientes celulares? En el menú toca **🤖 + Jugador de prueba** una o varias veces.
 - Los robots juegan solos: aprietan ¡BASTA!, escriben respuestas chistosas, votan, marcan su tabla de lotería y le pegan a la piñata.

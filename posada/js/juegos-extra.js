@@ -65,12 +65,12 @@ function pantallaFinal(titulo, puntos, onOtra) {
 function crearConfig({ clave, titulo, min, ajustes = [], opciones = null, nota = '', onSeguir }) {
   let cfg = null;
   function config() {
-    if (!cfg) { cfg = { sel: new Set(conectados()) }; ajustes.forEach(a => cfg[a.k] = a.def); if (opciones) cfg[opciones.k] = opciones.def; }
+    if (!cfg) { cfg = { sel: new Set(clave === 'probable' ? conectados() : conCelular()) }; ajustes.forEach(a => cfg[a.k] = a.def); if (opciones) cfg[opciones.k] = opciones.def; }
     pintar();
   }
   function seleccion() { return [...cfg.sel].filter(enLinea); }
   function pintar() {
-    conectados().forEach(u => { if (!cfg.vistos || !cfg.vistos.has(u)) cfg.sel.add(u); });
+    conectados().forEach(u => { if ((!cfg.vistos || !cfg.vistos.has(u)) && (!esManual(u) || clave === 'probable')) cfg.sel.add(u); });
     cfg.vistos = new Set(conectados());
     Juego.iniciar({ refrescar: () => { if (pantallaActual === 'cfg-' + clave) pintar(); }, llego: vistaLobby });
     const n = seleccion().length;
@@ -260,7 +260,7 @@ const Probable = (() => {
         <div class="frase-chusca aparecer">${escaparHTML(p)}</div>
         <div id="reloj" class="reloj" style="font-size:clamp(3rem,13vmin,8rem)"></div>
         <div class="barra-tiempo"><div id="barraTiempo"></div></div>
-        <p class="narracion" style="font-size:clamp(1rem,3vmin,2rem)">📱 ¡Voten en secreto! <span id="votosCuenta">0</span>/${conectados().length}</p>
+        <p class="narracion" style="font-size:clamp(1rem,3vmin,2rem)">📱 ¡Voten en secreto! <span id="votosCuenta">0</span>/${conCelular().length}</p>
         <div class="fila"><button class="btn secundario" data-a="ya">⏩ Ver resultados</button></div>
       </div>`, { salir: confirmarSalida, ya: revelar });
     Q.reloj = iniciarReloj(20, revelar);
@@ -308,7 +308,7 @@ const Probable = (() => {
     Sonido.reproducir('tic');
     vistaEspera(u, '¡Voto secreto registrado! 🤫', 'Espera los resultados', '✅');
     const el = document.getElementById('votosCuenta'); if (el) el.textContent = Object.keys(Q.votos).length;
-    if (conectados().every(x => Q.votos[x])) setTimeout(revelar, 700);
+    if (conCelular().every(x => Q.votos[x])) setTimeout(revelar, 700);
   }
   return { config };
 })();
@@ -386,7 +386,7 @@ const Mentiras = (() => {
         <h3 class="centro" style="margin:0">🕵️ ¿Cuál es la VERDAD? Voten en su celular</h3>
         <div class="respuestas-chuscas muchas ${M.opciones.length > 9 ? 'compactas' : ''}">${M.opciones.map(o => `<div class="resp-chusca aparecer"><span class="letra-resp">${o.letra}</span><span>${escaparHTML(o.texto)}</span></div>`).join('')}</div>
         <div class="fila entre"><div id="reloj" class="reloj" style="font-size:clamp(2.5rem,9vmin,5rem)"></div>
-          <span class="narracion" style="font-size:clamp(1rem,3vmin,2rem)"><span id="votosCuenta">0</span>/${conectados().length} votos</span>
+          <span class="narracion" style="font-size:clamp(1rem,3vmin,2rem)"><span id="votosCuenta">0</span>/${conCelular().length} votos</span>
           <button class="btn secundario" data-a="ya">⏩ Revelar</button></div>
       </div>`, { salir: confirmarSalida, ya: revelar });
     M.reloj = iniciarReloj(25, revelar);
@@ -449,7 +449,7 @@ const Mentiras = (() => {
       Sonido.reproducir('tic');
       vistaEspera(u, '¡Mentira guardada! 😈', 'Espera a los demás…', '🤥');
       progreso();
-      if (M.participantes.every(p => M.mentiras[p] || !enLinea(p))) setTimeout(votar, 800);
+      if (M.participantes.every(p => M.mentiras[p] || !enLinea(p) || esManual(p))) setTimeout(votar, 800);
       return;
     }
     if (m.t === 'voto' && M.fase === 'votar' && m.id === 'mv' + M.idx && !M.votos[u]) {
@@ -459,7 +459,7 @@ const Mentiras = (() => {
       Sonido.reproducir('tic');
       vistaEspera(u, '¡Voto registrado! 🕵️', 'Espera la revelación…', '✅');
       const el = document.getElementById('votosCuenta'); if (el) el.textContent = Object.keys(M.votos).length;
-      if (conectados().every(x => M.votos[x])) setTimeout(revelar, 700);
+      if (conCelular().every(x => M.votos[x])) setTimeout(revelar, 700);
     }
   }
   return { config };

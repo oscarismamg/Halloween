@@ -139,7 +139,7 @@ const DadoRegalos = (() => {
   function actualizarTextos() {
     const t = document.getElementById('turnoDado');
     const u = actual();
-    if (t) t.innerHTML = u ? `Turno de <b>${ficha(u)}</b>${cfg.celular && !esBot(u) ? ' · 📱 tira desde tu celular' : ''}` : '';
+    if (t) t.innerHTML = u ? `Turno de <b>${ficha(u)}</b>${cfg.celular && !esBot(u) && !esManual(u) ? ' · 📱 tira desde tu celular' : esManual(u) ? ' · 🎲 tira en la TV' : ''}` : '';
     const o = document.getElementById('ordenDado');
     if (o) o.innerHTML = S.orden.map((x, i) => `<span class="ficha ${i === S.turno % S.orden.length ? 'activa' : 'apagada'}">${i + 1}. ${ficha(x)}</span>`).join('');
     const r = document.getElementById('resultadoDado');

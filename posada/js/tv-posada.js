@@ -26,7 +26,9 @@ const J = uid => P.jugadores[uid];
 const nombre = uid => (J(uid) ? J(uid).nombre : '?');
 const ficha = uid => (J(uid) ? `${J(uid).emoji} ${escaparHTML(J(uid).nombre)}` : '?');
 const esBot = uid => !!(J(uid) && J(uid).bot);
-const enLinea = uid => esBot(uid) || RedTV.conectado(uid);
+const esManual = uid => !!(J(uid) && J(uid).manual); // registrado en la TV, sin celular
+const enLinea = uid => esBot(uid) || esManual(uid) || RedTV.conectado(uid);
+const conCelular = () => conectados().filter(u => !esManual(u));
 const conectados = () => P.orden.filter(enLinea);
 function sumarPuntos(uids, n) { uids.forEach(u => { if (J(u)) J(u).puntos = Math.max(0, (J(u).puntos || 0) + n); }); guardar(); }
 const sinEmojis = s => String(s).replace(/\p{Extended_Pictographic}/gu, '').replace(/_{2,}/g, ' blanco ');
@@ -188,6 +190,7 @@ function ponerVista(uid, v) {
   v.seq = ++seq;
   vistas.set(uid, v);
   if (esBot(uid)) return Bots.recibir(uid, v);
+  if (esManual(uid)) return;
   RedTV.enviar(uid, { t: 'vista', v, yo: J(uid) ? { nombre: J(uid).nombre, emoji: J(uid).emoji, puntos: J(uid).puntos || 0 } : null });
 }
 function vistaEspera(uid, titulo, texto = 'Mira la TV 📺', emoji = '🎄', extra = {}) {
@@ -247,9 +250,10 @@ function manejarMensaje(uid, d) {
   Juego.mensaje(uid, d);
 }
 function textoEstadoRed() {
+  if (!navigator.onLine) return '🔴 Sin internet: los celulares no pueden unirse. Puedes usar 👥 Registrar sin celular';
   return ({
     lista: '🟢 Sala abierta', conectando: '🟡 Abriendo la sala…', reconectando: '🟡 Reconectando…',
-    reclamando: '🟡 Recuperando la sala…', 'sin-red': '🔴 Sin internet. Reintentando…'
+    reclamando: '🟡 Recuperando la sala…', 'sin-red': '🔴 Sin internet: los celulares no pueden unirse. Puedes usar 👥 Registrar sin celular'
   })[estadoRed] || estadoRed;
 }
 function enlaceControl() {
@@ -264,7 +268,7 @@ function refrescarListas() {
 function htmlJugadores(conExpulsar) {
   if (!P.orden.length) return '<p class="tenue centro">Nadie se ha unido todavía… 🦗</p>';
   return `<div class="fichas">${P.orden.map(uid => `
-    <span class="ficha ${enLinea(uid) ? 'activa' : 'apagada'}" ${conExpulsar ? `data-a="expulsar" data-uid="${uid}"` : ''}>${ficha(uid)}</span>`).join('')}</div>`;
+    <span class="ficha ${enLinea(uid) ? 'activa' : 'apagada'}" ${conExpulsar ? `data-a="expulsar" data-uid="${uid}"` : ''}>${ficha(uid)}${esManual(uid) ? ' 📵' : ''}</span>`).join('')}</div>`;
 }
 
 /* =========================================================
@@ -305,6 +309,7 @@ function menu() {
       <div class="fila">
         <button class="btn secundario" data-a="marcador">🏆 Marcador</button>
         <button class="btn secundario" data-g="corregir">✏️ Corregir puntos</button>
+        <button class="btn secundario" data-a="manuales">👥 Registrar sin celular</button>
         <button class="btn secundario" data-a="bot">🤖 + Jugador de prueba</button>
         <button class="btn secundario" data-a="ajustes">⚙️ Ajustes</button>
       </div>
@@ -313,7 +318,45 @@ function menu() {
     marcador: pantallaMarcador,
     ajustes: pantallaAjustes,
     bot: () => Bots.agregar(),
-    expulsar: d => { if (confirm(`¿Sacar a ${nombre(d.uid)} de la sala? (pierde sus puntos)`)) { if (esBot(d.uid)) Bots.limpiar(d.uid); else RedTV.expulsar(d.uid); delete P.jugadores[d.uid]; P.orden = P.orden.filter(u => u !== d.uid); guardar(); refrescarListas(); } }
+    manuales: pantallaManuales,
+    expulsar: d => { if (confirm(`¿Sacar a ${nombre(d.uid)} de la sala? (pierde sus puntos)`)) { if (esBot(d.uid)) Bots.limpiar(d.uid); else if (!esManual(d.uid)) RedTV.expulsar(d.uid); delete P.jugadores[d.uid]; P.orden = P.orden.filter(u => u !== d.uid); guardar(); refrescarListas(); } }
+  });
+}
+
+/* ---------------- 👥 Registrar jugadores sin celular ---------------- */
+function pantallaManuales() {
+  const manuales = P.orden.filter(esManual);
+  pantalla('manuales', `
+    ${barra('👥 Jugadores sin celular', false)}
+    <div class="contenido" style="justify-content:flex-start">
+      <p class="centro" style="margin:0">Para quien no tiene celular, se quedó sin pila o sin internet. Cuentan para <b>turnos, equipos, puntos y coronación</b> 📵</p>
+      <form id="formManual" class="fila" autocomplete="off">
+        <input type="text" id="nombreManual" placeholder="Nombre" maxlength="14" style="flex:1;min-width:200px">
+        <button class="btn" type="submit">➕ Agregar</button>
+      </form>
+      <div class="fichas">${manuales.map(u => `<span class="ficha activa">${ficha(u)} <span class="x" data-a="quitar" data-uid="${u}">✕</span></span>`).join('') || '<p class="tenue">Nadie registrado todavía</p>'}</div>
+      <div class="tarjeta">
+        <h3 style="margin-top:0">¿En qué juegos participan?</h3>
+        <p style="margin:.2em 0">✅ <b>Dado de Regalos</b> (tiran desde la TV) · <b>100 Posaderos</b> (contestan en voz alta; el conductor marca quién gana el cara a cara) · <b>¿Quién es más probable?</b> (aparecen como opción para votar)</p>
+        <p class="tenue" style="margin:.2em 0">Los juegos donde hay que escribir o tocar el celular no los incluyen por defecto, pero puedes meterlos tocando su nombre.</p>
+      </div>
+      <div class="fila" style="margin-top:auto"><button class="btn grande" data-a="listo">Listo ✔</button></div>
+    </div>`, {
+    listo: menu,
+    quitar: d => { if (confirm(`¿Quitar a ${nombre(d.uid)}? (pierde sus puntos)`)) { delete P.jugadores[d.uid]; P.orden = P.orden.filter(u => u !== d.uid); guardar(); pantallaManuales(); } }
+  });
+  document.getElementById('formManual').addEventListener('submit', ev => {
+    ev.preventDefault();
+    const nom = document.getElementById('nombreManual').value.trim().slice(0, 14);
+    if (!nom) return;
+    if (Object.values(P.jugadores).some(x => x.nombre.toLowerCase() === nom.toLowerCase())) { alert('Ya hay alguien con ese nombre 😉'); return; }
+    const usados = new Set(Object.values(P.jugadores).map(x => x.emoji));
+    const uid = 'manual-' + Math.random().toString(36).slice(2, 8);
+    P.jugadores[uid] = { uid, nombre: nom, emoji: EMOJIS_POSADA.find(e => !usados.has(e)) || elegir(EMOJIS_POSADA), puntos: 0, manual: true };
+    P.orden.push(uid); guardar();
+    Sonido.reproducir('cascabeles', 0.4);
+    pantallaManuales();
+    setTimeout(() => document.getElementById('nombreManual')?.focus(), 50);
   });
 }
 
@@ -434,7 +477,7 @@ const Posaderos = (() => {
       ${barra('🎯 100 Posaderos Dijeron')}
       <div class="contenido" style="justify-content:flex-start">
         <h3>🎤 ¿Quién conduce? <span class="tenue" style="font-weight:600">(ve las respuestas en su celular y controla el tablero, no juega)</span></h3>
-        <div class="fichas">${lista.filter(u => !esBot(u)).map(u => `<button class="ficha ${cfg.conductor === u ? 'elegida' : ''}" data-a="conductor" data-uid="${u}">${cfg.conductor === u ? '🎤 ' : ''}${ficha(u)}</button>`).join('') || '<p class="tenue">Nadie conectado</p>'}</div>
+        <div class="fichas">${lista.filter(u => !esBot(u) && !esManual(u)).map(u => `<button class="ficha ${cfg.conductor === u ? 'elegida' : ''}" data-a="conductor" data-uid="${u}">${cfg.conductor === u ? '🎤 ' : ''}${ficha(u)}</button>`).join('') || '<p class="tenue">Nadie conectado</p>'}</div>
         <h3>🙋 ¿Quién juega?</h3>
         ${htmlSeleccion(cfg.sel)}
         <div class="tarjeta"><div class="ajuste">Rondas
@@ -766,11 +809,11 @@ const Chuscas = (() => {
   let C = null, cfg = null;
 
   function config() {
-    if (!cfg) cfg = { sel: new Set(conectados()), tiempo: 90 };
+    if (!cfg) cfg = { sel: new Set(conCelular()), tiempo: 90 };
     pintarConfig();
   }
   function pintarConfig() {
-    conectados().forEach(u => { if (!cfg.vistos || !cfg.vistos.has(u)) cfg.sel.add(u); });
+    conectados().forEach(u => { if ((!cfg.vistos || !cfg.vistos.has(u)) && !esManual(u)) cfg.sel.add(u); });
     cfg.vistos = new Set(conectados());
     Juego.iniciar({ refrescar: () => { if (pantallaActual === 'ch-config') pintarConfig(); }, llego: vistaLobby });
     const n = participantesSel().length;
@@ -878,7 +921,7 @@ const Chuscas = (() => {
     d.votos = {};
     const opciones = barajar(d.autores).map((u, i) => ({ k: u, letra: 'ABCDEFGHIJKLMNOP'[i], texto: d.resp[u] }));
     d.opciones = opciones;
-    const votantes = conectados().filter(u => !d.autores.includes(u) || d.final);
+    const votantes = conCelular().filter(u => !d.autores.includes(u) || d.final);
     d.votantes = votantes;
     pantalla('ch-votar', `
       ${barra(d.final ? '🌶️ Ronda final' : `😂 Ronda ${C.ronda} · Duelo ${C.idx + 1} de ${C.ordenDuelos.length}`)}
@@ -1003,7 +1046,7 @@ const Chuscas = (() => {
       Sonido.reproducir('tic');
       siguienteFrase(u);
       pintarProgreso();
-      if (C.participantes.every(p => !C.pendientes[p].length || !enLinea(p))) setTimeout(terminarEscritura, 800);
+      if (C.participantes.every(p => !C.pendientes[p].length || !enLinea(p) || esManual(p))) setTimeout(terminarEscritura, 800);
       return;
     }
     if (m.t === 'voto' && C.fase === 'votar') {
@@ -1101,3 +1144,6 @@ function bienvenida() {
   });
 }
 window.addEventListener('DOMContentLoaded', () => { iniciarRed(); bienvenida(); });
+// Modo offline: guardar la página en el teléfono
+if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(() => { });
+['online', 'offline'].forEach(ev => window.addEventListener(ev, () => { const el = document.getElementById('estadoRed'); if (el) el.innerHTML = textoEstadoRed(); }));
