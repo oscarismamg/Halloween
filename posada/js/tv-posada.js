@@ -25,7 +25,8 @@ Object.assign(Sonido.config, P.ajustes, { ambiente: false });
 const J = uid => P.jugadores[uid];
 const nombre = uid => (J(uid) ? J(uid).nombre : '?');
 const ficha = uid => (J(uid) ? `${J(uid).emoji} ${escaparHTML(J(uid).nombre)}` : '?');
-const enLinea = uid => RedTV.conectado(uid);
+const esBot = uid => !!(J(uid) && J(uid).bot);
+const enLinea = uid => esBot(uid) || RedTV.conectado(uid);
 const conectados = () => P.orden.filter(enLinea);
 function sumarPuntos(uids, n) { uids.forEach(u => { if (J(u)) J(u).puntos = Math.max(0, (J(u).puntos || 0) + n); }); guardar(); }
 const sinEmojis = s => String(s).replace(/\p{Extended_Pictographic}/gu, '').replace(/_{2,}/g, ' blanco ');
@@ -186,6 +187,7 @@ let seq = 0;
 function ponerVista(uid, v) {
   v.seq = ++seq;
   vistas.set(uid, v);
+  if (esBot(uid)) return Bots.recibir(uid, v);
   RedTV.enviar(uid, { t: 'vista', v, yo: J(uid) ? { nombre: J(uid).nombre, emoji: J(uid).emoji, puntos: J(uid).puntos || 0 } : null });
 }
 function vistaEspera(uid, titulo, texto = 'Mira la TV 📺', emoji = '🎄', extra = {}) {
@@ -231,16 +233,18 @@ function iniciarRed() {
       refrescarListas();
     },
     salio: uid => { Juego.salio(uid); refrescarListas(); },
-    mensaje: (uid, d) => {
-      if (d.t === 'renombrar' && d.nombre) {
-        const n = String(d.nombre).trim().slice(0, 14);
-        if (n && !Object.values(P.jugadores).some(x => x.uid !== uid && x.nombre.toLowerCase() === n.toLowerCase())) { J(uid).nombre = n; guardar(); refrescarListas(); }
-        const v = vistas.get(uid); if (v) ponerVista(uid, v);
-        return;
-      }
-      Juego.mensaje(uid, d);
-    }
+    mensaje: (uid, d) => manejarMensaje(uid, d)
   });
+}
+// Mensajes que llegan de un celular (o de un jugador de prueba 🤖)
+function manejarMensaje(uid, d) {
+  if (d.t === 'renombrar' && d.nombre) {
+    const n = String(d.nombre).trim().slice(0, 14);
+    if (n && !Object.values(P.jugadores).some(x => x.uid !== uid && x.nombre.toLowerCase() === n.toLowerCase())) { J(uid).nombre = n; guardar(); refrescarListas(); }
+    const v = vistas.get(uid); if (v) ponerVista(uid, v);
+    return;
+  }
+  Juego.mensaje(uid, d);
 }
 function textoEstadoRed() {
   return ({
@@ -301,13 +305,15 @@ function menu() {
       <div class="fila">
         <button class="btn secundario" data-a="marcador">🏆 Marcador</button>
         <button class="btn secundario" data-g="corregir">✏️ Corregir puntos</button>
+        <button class="btn secundario" data-a="bot">🤖 + Jugador de prueba</button>
         <button class="btn secundario" data-a="ajustes">⚙️ Ajustes</button>
       </div>
     </div>`, {
     juego: d => { Sonido.reproducir('cascabeles'); REGISTRO[d.id].config(); },
     marcador: pantallaMarcador,
     ajustes: pantallaAjustes,
-    expulsar: d => { if (confirm(`¿Sacar a ${nombre(d.uid)} de la sala? (pierde sus puntos)`)) { RedTV.expulsar(d.uid); delete P.jugadores[d.uid]; P.orden = P.orden.filter(u => u !== d.uid); guardar(); refrescarListas(); } }
+    bot: () => Bots.agregar(),
+    expulsar: d => { if (confirm(`¿Sacar a ${nombre(d.uid)} de la sala? (pierde sus puntos)`)) { if (esBot(d.uid)) Bots.limpiar(d.uid); else RedTV.expulsar(d.uid); delete P.jugadores[d.uid]; P.orden = P.orden.filter(u => u !== d.uid); guardar(); refrescarListas(); } }
   });
 }
 
@@ -371,6 +377,7 @@ function pantallaAjustes() {
       </div>
       <div class="fila">
         <button class="btn secundario" data-a="probar">🔊 Probar sonido</button>
+        <button class="btn secundario" data-a="sinBots">🤖 Quitar jugadores de prueba</button>
         <button class="btn secundario" data-a="sala">🔁 Nueva sala (nuevo código)</button>
         <button class="btn secundario" data-a="borrar">🗑️ Borrar jugadores y puntos</button>
         <button class="btn" data-a="volver">◀ Menú</button>
@@ -378,6 +385,7 @@ function pantallaAjustes() {
     </div>`, {
     volver: menu,
     probar: () => { Sonido.reproducir('navidad'); Sonido.decir('¡Bienvenidos a la posada! Pásele, pásele.'); },
+    sinBots: () => { const n = Bots.quitarTodos(); alert(n ? `Listo: se quitaron ${n} jugadores de prueba 🤖` : 'No hay jugadores de prueba'); },
     sala: () => { if (confirm('¿Crear una sala nueva? Todos tendrán que volver a escanear el QR.')) { P.sala = nuevoCodigo(); guardar(); location.reload(); } },
     borrar: () => { if (confirm('¿Borrar jugadores y puntos?')) { const sala = P.sala; P = estadoInicial(); P.sala = sala; guardar(); location.reload(); } }
   });
@@ -426,7 +434,7 @@ const Posaderos = (() => {
       ${barra('🎯 100 Posaderos Dijeron')}
       <div class="contenido" style="justify-content:flex-start">
         <h3>🎤 ¿Quién conduce? <span class="tenue" style="font-weight:600">(ve las respuestas en su celular y controla el tablero, no juega)</span></h3>
-        <div class="fichas">${lista.map(u => `<button class="ficha ${cfg.conductor === u ? 'elegida' : ''}" data-a="conductor" data-uid="${u}">${cfg.conductor === u ? '🎤 ' : ''}${ficha(u)}</button>`).join('') || '<p class="tenue">Nadie conectado</p>'}</div>
+        <div class="fichas">${lista.filter(u => !esBot(u)).map(u => `<button class="ficha ${cfg.conductor === u ? 'elegida' : ''}" data-a="conductor" data-uid="${u}">${cfg.conductor === u ? '🎤 ' : ''}${ficha(u)}</button>`).join('') || '<p class="tenue">Nadie conectado</p>'}</div>
         <h3>🙋 ¿Quién juega?</h3>
         ${htmlSeleccion(cfg.sel)}
         <div class="tarjeta"><div class="ajuste">Rondas
@@ -1017,6 +1025,63 @@ const Chuscas = (() => {
 
 REGISTRO.posaderos = Posaderos;
 REGISTRO.chuscas = Chuscas;
+
+
+/* =========================================================
+   🤖 JUGADORES DE PRUEBA (robots que juegan solos)
+   ========================================================= */
+const Bots = (() => {
+  const NOMBRES = ['Pancho Bot', 'Chona Bot', 'Robotín', 'Lupita Bot', 'Tamalito', 'Doña Bot', 'Chabelo Bot', 'Ponchito', 'Bot Beto', 'Rebotina'];
+  const CHISTES = ['un tamal de chicle', 'la cuenta del bar', 'mi ex con su nuevo novio', 'calcetines usados', 'un abrazo y ya',
+    'ponche sin piquete', 'la suegra bailando reguetón', 'un pato con pantalón', 'el wifi del vecino', 'tres tristes tamales',
+    'un Santa en chanclas', 'el recalentado del recalentado', 'mi tía en TikTok', 'un reno con crudota', 'la tanda que nunca pagué'];
+  const MENTIRAS = ['calcetines', 'tamales', 'chanclas', 'el control de la tele', 'galletas', 'piñatas', 'sus abuelitas', 'pepinillos', 'cucharas de palo', 'velas de colores'];
+  const timers = new Map();
+  const azar = (a, b) => a + Math.floor(Math.random() * (b - a));
+
+  function agregar() {
+    const usados = new Set(Object.values(P.jugadores).map(j => j.nombre));
+    const nom = NOMBRES.find(n => !usados.has(n)) || `Bot ${Object.values(P.jugadores).filter(j => j.bot).length + 1}`;
+    const uid = 'bot-' + Math.random().toString(36).slice(2, 8);
+    P.jugadores[uid] = { uid, nombre: nom, emoji: '🤖', puntos: 0, bot: true };
+    P.orden.push(uid); guardar();
+    Sonido.reproducir('cascabeles', 0.4);
+    Juego.llego(uid);
+    refrescarListas();
+  }
+  function limpiar(uid) { (timers.get(uid) || []).forEach(t => { clearTimeout(t); clearInterval(t); }); timers.delete(uid); }
+  function quitarTodos() {
+    const bots = P.orden.filter(esBot);
+    bots.forEach(u => { limpiar(u); delete P.jugadores[u]; vistas.delete(u); });
+    P.orden = P.orden.filter(u => !bots.includes(u)); guardar();
+    refrescarListas();
+    return bots.length;
+  }
+  function guardarTimer(uid, t) { if (!timers.has(uid)) timers.set(uid, []); timers.get(uid).push(t); }
+  function despues(uid, ms, fn) { guardarTimer(uid, setTimeout(fn, ms)); }
+
+  function textoPara(v) {
+    if (v.sinTip) { // Villancico: a veces le atina
+      const a = ACERTIJOS_EMOJI.find(x => v.frase.startsWith(x.e));
+      return a && Math.random() < 0.4 ? a.r.replace(/\(.*?\)/g, '').trim() : elegir(ACERTIJOS_EMOJI).r;
+    }
+    if (v.instr) return elegir(MENTIRAS);
+    return elegir(CHISTES);
+  }
+
+  // Reacciona a la "pantalla" que le mandaría la TV a un celular
+  function recibir(uid, v) {
+    limpiar(uid);
+    const vigente = () => P.jugadores[uid] && vistas.get(uid) && vistas.get(uid).seq === v.seq;
+    const mandar = d => { if (vigente()) manejarMensaje(uid, d); };
+    if (v.tipo === 'basta' && v.activo) despues(uid, azar(2000, 7000), () => mandar({ t: 'basta' }));
+    else if (v.tipo === 'escribir') despues(uid, azar(2500, 7000), () => mandar({ t: 'respuesta', id: v.id, texto: textoPara(v) }));
+    else if (v.tipo === 'votar' && v.opciones && v.opciones.length) despues(uid, azar(1500, 5000), () => mandar({ t: 'voto', id: v.id, k: elegir(v.opciones).k }));
+    else if (v.tipo === 'tabla' && v.botMarcadas) despues(uid, azar(1500, 3500), () => mandar({ t: 'loteria', id: v.id, marcadas: v.botMarcadas, bot: true }));
+    else if (v.tipo === 'dale' && v.activo) guardarTimer(uid, setInterval(() => { if (!vigente()) return limpiar(uid); manejarMensaje(uid, { t: 'golpes', id: v.id, n: azar(1, 4) }); }, 300));
+  }
+  return { agregar, quitarTodos, recibir, limpiar };
+})();
 
 /* ---------------- Arranque ---------------- */
 function bienvenida() {

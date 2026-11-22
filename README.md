@@ -67,6 +67,12 @@ Carrera de toques: todos le pegan desde su celular lo más rápido que puedan.
 
 En todos los juegos con puntos, al final el 🥇 recibe +3, el 🥈 +2 y el 🥉 +1 en el marcador de la noche.
 
+### 🤖 Jugadores de prueba
+¿Quieres probar un juego y no tienes suficientes celulares? En el menú toca **🤖 + Jugador de prueba** una o varias veces.
+- Los robots juegan solos: aprietan ¡BASTA!, escriben respuestas chistosas, votan, marcan su tabla de lotería y le pegan a la piñata.
+- No pueden ser conductores en 100 Posaderos.
+- Para sacar a uno, tócalo en la lista de jugadores. Para sacarlos a todos: **⚙️ Ajustes → Quitar jugadores de prueba**.
+
 ### ✏️ Corregir puntos
 Si alguien se equivocó al votar o quieres premiar o castigar a alguien, toca **✏️ Puntos** en la barra de arriba (está en todas las pantallas) o **✏️ Corregir puntos** en el menú.
 - Se abre una ventana encima del juego, sin interrumpirlo.

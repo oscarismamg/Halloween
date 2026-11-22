@@ -135,7 +135,9 @@ const Loteria = (() => {
   function vistaPara(u) {
     if (!L.tablas[u]) return { tipo: 'espera', emoji: '🍿', titulo: 'Estás de público', texto: 'Entras en la siguiente partida' };
     const ult = L.actual != null ? CARTAS_LOTERIA[L.actual] : null;
-    return { tipo: 'tabla', id: L.id, modo: NOMBRE_MODO[L.modo], cartas: L.tablas[u].map(i => ({ n: CARTAS_LOTERIA[i].n, e: CARTAS_LOTERIA[i].e })), ultima: ult ? { n: ult.n, e: ult.e } : null, num: L.cantadas.length };
+    const v = { tipo: 'tabla', id: L.id, modo: NOMBRE_MODO[L.modo], cartas: L.tablas[u].map(i => ({ n: CARTAS_LOTERIA[i].n, e: CARTAS_LOTERIA[i].e })), ultima: ult ? { n: ult.n, e: ult.e } : null, num: L.cantadas.length };
+    if (esBot(u)) v.botMarcadas = L.tablas[u].map((c, pos) => (L.cantadas.includes(c) ? pos : -1)).filter(p => p >= 0);
+    return v;
   }
 
   function pintar() {
@@ -191,6 +193,7 @@ const Loteria = (() => {
     const tabla = L.tablas[u];
     const valida = PATRONES[L.modo].some(p => p.every(pos => marcadas.has(pos) && L.cantadas.includes(tabla[pos])));
     if (valida) return ganar(u, marcadas);
+    if (m.bot) return; // los robots solo cantan lotería cuando la tienen
     // Lotería falsa
     Sonido.reproducir('tache'); temblar();
     const av = document.getElementById('avisoLoteria');
