@@ -50,12 +50,15 @@ Al estilo de Quiplash, con más de 90 frases en tono picosito.
 ### 🤥 Mentiras Navideñas
 Al estilo de Fibbage, con 23 datos reales y rarísimos de Navidad.
 - Cada quien inventa una mentira para llenar el hueco. Si escribes la verdad, el celular te avisa y te pide otra.
+- Todas las opciones se muestran en minúsculas, para que la verdad no se delate por cómo está escrita.
 - Luego todos buscan la verdad entre las mentiras: encontrarla da +500 y cada persona que cae en tu mentira te da +250.
 
 ### 🔔 Adivina el Villancico
 30 acertijos de emojis: villancicos, canciones y películas navideñas.
-- El primero que aprieta **¡BASTA!** contesta en voz alta.
-- El anfitrión marca ✔ o ✖. Si fallas, quedas fuera de ese acertijo. Hay botón de pista 💡.
+- En la TV aparecen los espacios del título y **cada 6 segundos se destapa una letra**.
+- Quien aprieta **¡BASTA!** **escribe su respuesta en el celular** y se revisa sola, aceptando faltas de ortografía.
+- Entre menos letras destapadas, más puntos (de 100 a 20). Si fallas, la TV muestra lo que escribiste y quedas fuera de ese acertijo.
+- Si la revisión automática se equivoca, el anfitrión toca **"✔ Sí se vale"**.
 
 ### 🪅 Rompe la Piñata
 Carrera de toques: todos le pegan desde su celular lo más rápido que puedan.

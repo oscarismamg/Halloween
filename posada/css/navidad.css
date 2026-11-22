@@ -250,3 +250,10 @@ body.celular input[type=text] { -webkit-user-select: text; user-select: text; }
 /* Que el fondo no se corte en listas largas del celular */
 html, body { background-color: #04100a; }
 body.celular { background-attachment: scroll; min-height: 100vh; }
+
+/* ---------- Villancico: título con letras ---------- */
+.titulo-oculto { display: flex; flex-wrap: wrap; justify-content: center; gap: .25em .15em; font-weight: 900; font-size: clamp(1.4rem, 5vmin, 3.4rem); }
+.letra-v { min-width: .9em; text-align: center; color: var(--naranja2); border-bottom: 4px solid rgba(255, 211, 107, .6); line-height: 1.2; }
+.letra-v.oculta { color: transparent; }
+.letra-v.nueva { animation: aparecer .5s ease both; }
+.hueco-palabra { width: .9em; }

@@ -354,7 +354,7 @@ const Mentiras = (() => {
   }
   function vistaEscribir(u, error) {
     const q = M.preguntas[M.idx];
-    ponerVista(u, { tipo: 'escribir', id: 'm' + M.idx, frase: q.p, n: M.idx + 1, total: M.preguntas.length, instr: 'Escribe una MENTIRA creíble 🤥', error, max: 40 });
+    ponerVista(u, { tipo: 'escribir', id: 'm' + M.idx, frase: q.p, n: M.idx + 1, total: M.preguntas.length, instr: 'Escribe una MENTIRA creíble 🤥', error, max: 40, minusculas: true });
   }
   function progreso() {
     const el = document.getElementById('progreso');
@@ -373,7 +373,9 @@ const Mentiras = (() => {
     });
     const casa = barajar(q.m || []).filter(t => !grupos.some(g => seParece(g.texto, t)));
     while (grupos.length + 1 < 4 && casa.length) grupos.push({ texto: casa.pop(), autores: [], casa: true });
-    M.opciones = barajar([...grupos, { texto: q.v, autores: [], verdad: true }]).map((o, i) => ({ ...o, k: String(i), letra: 'ABCDEFGHIJKLMNOPQRS'[i] }));
+    // Todo en minúsculas y sin punto final, para que ninguna opción se delate por cómo está escrita
+    const aMinusculas = t => String(t).toLocaleLowerCase('es-MX').replace(/[.。]+$/, '').trim();
+    M.opciones = barajar([...grupos, { texto: q.v, autores: [], verdad: true }]).map((o, i) => ({ ...o, texto: aMinusculas(o.texto), k: String(i), letra: 'ABCDEFGHIJKLMNOPQRS'[i] }));
     pantalla('mentiras-votar', `
       ${barra(`🤥 Pregunta ${M.idx + 1} de ${M.preguntas.length}`)}
       <div class="contenido" style="gap:1.4vh">
@@ -462,80 +464,150 @@ const Mentiras = (() => {
 
 /* =========================================================
    🔔 ADIVINA EL VILLANCICO
+   Se van destapando letras del título; quien aprieta ¡BASTA!
+   escribe su respuesta en el celular y se revisa sola.
    ========================================================= */
 const Villancico = (() => {
   let V = null;
+  const SEG_LETRA = 6;
   const config = crearConfig({
     clave: 'villancico', titulo: '🔔 Adivina el Villancico', min: 2,
     ajustes: [{ k: 'acertijos', etiqueta: 'Acertijos', def: 10, min: 5, max: 30, paso: 1 }],
     nota: 'Villancicos, canciones y películas navideñas en emojis.',
     onSeguir: (ps, cfg) => pantallaReglas('🔔 Adivina el Villancico', [
-      'En la TV aparecen <b>emojis</b> que representan un villancico, canción o película navideña.',
-      'Si lo sabes, aprieta <b>¡BASTA!</b> en tu celular y dilo en voz alta.',
-      'Si atinas: <b>+100</b>. Si fallas, quedas fuera de ese acertijo y los demás pueden intentarlo.',
-      'El anfitrión marca ✔ o ✖ en la TV (el grupo es el juez 😏).'
-    ], 'Adivina el villancico. Aparecen emojis en la tele. Si sabes cuál es, aprieta basta en tu celular y dilo en voz alta. Si fallas, quedas fuera de ese acertijo.', () => {
+      'En la TV aparecen <b>emojis</b> y los espacios del título. <b>Cada pocos segundos se destapa una letra</b> 🔤.',
+      'Si ya sabes cuál es, aprieta <b>¡BASTA!</b> y <b>escribe la respuesta en tu celular</b>. Se revisa sola (no importan las faltas de ortografía).',
+      'Entre <b>menos letras</b> destapadas, <b>más puntos</b> (de 100 a 20).',
+      'Si fallas, quedas fuera de ese acertijo y los demás siguen intentando.'
+    ], 'Adivina el villancico. Aparecen emojis y se van destapando letras del título. Si sabes cuál es, aprieta basta y escribe la respuesta en tu celular. Entre menos letras, más puntos.', () => {
       V = { participantes: ps, acertijos: tomarAlAzar(ACERTIJOS_EMOJI, 'usadasVillancico', cfg.acertijos), idx: 0, puntos: {} };
       ps.forEach(u => V.puntos[u] = 0);
-      Juego.iniciar({ llego: u => ponerVista(u, vistaPara(u)), mensaje, salio: () => { } , puntos: puntosDe('Adivina el Villancico', () => V.puntos) });
+      Juego.iniciar({ llego: u => ponerVista(u, vistaPara(u)), mensaje, salio: () => { }, puntos: puntosDe('Adivina el Villancico', () => V.puntos) });
       acertijo();
     })
   });
 
+  // Respuestas aceptadas: el título completo y las partes entre paréntesis o después de ":"
+  function aceptadas(r) {
+    const partes = [r, r.replace(/\(.*?\)/g, ''), ...(r.match(/\((.*?)\)/g) || []).map(x => x.slice(1, -1)), ...r.split(':')];
+    return [...new Set(partes.map(x => x.trim()).filter(x => normalizar(x).length >= 2))];
+  }
+  function esCorrecta(texto, r) { return aceptadas(r).some(a => seParece(texto, a)); }
+  function posLetras(r) { return [...r].map((ch, i) => /[\p{L}\p{N}]/u.test(ch) ? i : -1).filter(i => i >= 0); }
+  function valorActual() { return Math.max(20, 100 - V.reveladas.size * 10); }
+  function tituloOculto(r) {
+    return [...r].map((ch, i) => {
+      if (ch === ' ') return '<span class="hueco-palabra"></span>';
+      if (!/[\p{L}\p{N}]/u.test(ch) || V.revelado || V.reveladas.has(i)) return `<span class="letra-v ${i === V.ultima && !V.revelado ? 'nueva' : ''}">${escaparHTML(ch)}</span>`;
+      return '<span class="letra-v oculta">_</span>';
+    }).join('');
+  }
+
   function acertijo() {
     const a = V.acertijos[V.idx];
     if (!a) return pantallaFinal('🔔 Adivina el Villancico', V.puntos, config);
-    V.basta = null; V.fuera = new Set(); V.revelado = false; V.pista = 0;
+    V.basta = null; V.fuera = new Set(); V.revelado = false; V.reveladas = new Set(); V.intento = null; V.ganador = null;
+    V.pendientes = barajar(posLetras(a.r));
     pintar();
     Sonido.reproducir('cascabeles', 0.6);
   }
-  function pistaTexto(r, nivel) {
-    return r.split(' ').map(w => w.length <= 2 ? w : w.slice(0, nivel) + '·'.repeat(Math.max(0, w.length - nivel))).join(' ');
+  function destaparLetra() {
+    if (!V.pendientes.length) return;
+    V.ultima = V.pendientes.pop(); V.reveladas.add(V.ultima);
+    if (!V.pendientes.length) { V.revelado = true; Sonido.decir(`Nadie le atinó. Era: ${V.acertijos[V.idx].r}`); }
+    pintar();
   }
+  function relojLetras() {
+    let s = SEG_LETRA;
+    const id = setInterval(() => {
+      if (V.basta || V.revelado) return;
+      s--;
+      const el = document.getElementById('sigLetra'); if (el) el.textContent = s;
+      if (s <= 0) { clearInterval(id); Sonido.reproducir('tic'); destaparLetra(); }
+    }, 1000);
+    alSalir(() => clearInterval(id));
+  }
+
   function pintar() {
     const a = V.acertijos[V.idx];
+    let estado;
+    if (V.revelado) estado = V.ganador ? `✅ ¡${ficha(V.ganador)} le atinó! +${V.ganador_pts}` : '😶 Nadie le atinó';
+    else if (V.basta) estado = `🔔 ${ficha(V.basta)} está escribiendo su respuesta… <span id="relojBasta"></span>`;
+    else estado = `📱 ¿Ya sabes? ¡Aprieta BASTA! · Vale <b>${valorActual()}</b> pts · nueva letra en <b id="sigLetra">${SEG_LETRA}</b>s`;
     pantalla('villancico', `
       ${barra(`🔔 Acertijo ${V.idx + 1} de ${V.acertijos.length}`)}
       <div class="contenido" style="gap:1.6vh">
         <div class="centro"><span class="etiqueta">${escaparHTML(a.c)}</span></div>
         <div class="emojis-acertijo aparecer">${a.e}</div>
-        <div class="centro narracion" id="estadoV">
-          ${V.revelado ? `<span class="verdad-txt">${escaparHTML(a.r)}</span>`
-        : V.basta ? `🔔 ¡${ficha(V.basta)}! ¿Cuál es?` : V.pista ? `💡 ${escaparHTML(pistaTexto(a.r, V.pista))}` : '📱 ¿Lo sabes? ¡Aprieta BASTA!'}
-        </div>
-        ${V.fuera.size ? `<p class="centro tenue" style="margin:0">Fuera de este acertijo: ${[...V.fuera].map(ficha).join(' ')}</p>` : ''}
+        <div class="titulo-oculto">${tituloOculto(a.r)}</div>
+        ${V.intento ? `<p class="centro narracion aparecer" style="margin:0">❌ ${ficha(V.intento.u)} escribió: «${escaparHTML(V.intento.t)}»</p>` : ''}
+        <div class="centro narracion" style="font-size:clamp(1rem,3vmin,2rem)">${estado}</div>
+        ${V.fuera.size && !V.revelado ? `<p class="centro tenue" style="margin:0">Fuera de este acertijo: ${[...V.fuera].map(ficha).join(' ')}</p>` : ''}
         <div class="fila">
           ${V.revelado ? `<button class="btn grande" data-a="sig">${V.idx + 1 >= V.acertijos.length ? '🏆 Resultados' : 'Siguiente ▶'}</button>`
-        : V.basta ? '<button class="btn verde grande" data-a="bien">✔ ¡Le atinó!</button><button class="btn rojo grande" data-a="mal">✖ No</button>'
-          : '<button class="btn secundario" data-a="pista">💡 Pista</button><button class="btn secundario" data-a="revelar">👀 Nadie sabe: revelar</button>'}
+        : V.basta ? '<button class="btn secundario" data-a="sinRespuesta">⏭ No contestó</button>'
+          : `${V.intento ? `<button class="btn verde" data-a="siSeVale">✔ Sí se vale lo de ${escaparHTML(nombre(V.intento.u))}</button>` : ''}
+             <button class="btn secundario" data-a="letra">🔤 Destapar letra</button>
+             <button class="btn secundario" data-a="revelar">👀 Revelar todo</button>`}
         </div>
         ${htmlRankingMini()}
       </div>`, {
       salir: confirmarSalida,
-      pista: () => { V.pista = Math.min(V.pista + 1, 4); pintar(); },
+      letra: () => { Sonido.reproducir('tic'); destaparLetra(); },
       revelar: () => { V.revelado = true; pintar(); Sonido.decir(a.r); },
-      bien: () => { V.puntos[V.basta] = (V.puntos[V.basta] || 0) + 100; V.revelado = true; Sonido.reproducir('exito'); lluvia(['🎶', '🔔', '⭐'], 25); pintar(); Sonido.decir(`¡Correcto! ${a.r}.`); },
-      mal: () => { V.fuera.add(V.basta); V.basta = null; Sonido.reproducir('tache'); pintar(); },
+      siSeVale: () => { const u = V.intento.u; V.fuera.delete(u); acierto(u); },
+      sinRespuesta: () => fallo(V.basta, '(no contestó a tiempo)'),
       sig: () => { V.idx++; acertijo(); }
     });
     conectados().forEach(u => ponerVista(u, vistaPara(u)));
+    if (V.basta && !V.revelado) {
+      let s = 25; const quien = V.basta;
+      const pintarS = () => { const el = document.getElementById('relojBasta'); if (el) el.textContent = `(${s}s)`; };
+      pintarS();
+      const id = setInterval(() => { s--; pintarS(); if (s <= 0) { clearInterval(id); if (V.basta === quien && !V.revelado) fallo(quien, '(no contestó a tiempo)'); } }, 1000);
+      alSalir(() => clearInterval(id));
+    } else if (!V.revelado) relojLetras();
   }
   function htmlRankingMini() {
     const t = Object.keys(V.puntos).filter(u => V.puntos[u] > 0).sort((a, b) => V.puntos[b] - V.puntos[a]).slice(0, 6);
     return t.length ? `<div class="fichas">${t.map(u => `<span class="ficha">${ficha(u)} · ${V.puntos[u]}</span>`).join('')}</div>` : '';
   }
   function vistaPara(u) {
+    const a = V.acertijos[V.idx];
     if (!V.participantes.includes(u)) return { tipo: 'espera', emoji: '🍿', titulo: 'Estás de público', texto: '¡Échale porras!' };
-    if (V.revelado) return { tipo: 'espera', emoji: '🎶', titulo: V.acertijos[V.idx].r, texto: 'Mira la TV 📺' };
+    if (V.revelado) return { tipo: 'espera', emoji: V.ganador === u ? '🎉' : '🎶', titulo: a.r, texto: V.ganador === u ? `¡Le atinaste! +${V.ganador_pts}` : 'Mira la TV 📺' };
+    if (V.basta === u) return { tipo: 'escribir', id: 'v' + V.idx, frase: `${a.e}  (${a.c})`, instr: '¿Cuál es? Escríbelo 🎶', max: 60, n: 1, total: 1, sinTip: true };
     if (V.fuera.has(u)) return { tipo: 'espera', emoji: '🙊', titulo: 'Quedaste fuera', texto: 'De este acertijo. ¡En el siguiente sí!' };
-    return { tipo: 'basta', activo: !V.basta, gane: V.basta === u, perdi: V.basta && V.basta !== u, titulo: V.basta === u ? '¡Dilo en voz alta! 🗣️' : V.basta ? `${nombre(V.basta)} apretó primero` : '¿Lo sabes? ¡APRIETA!' };
+    return { tipo: 'basta', activo: !V.basta, perdi: !!V.basta, titulo: V.basta ? `${nombre(V.basta)} está contestando…` : '¿Ya sabes cuál es? ¡APRIETA!' };
+  }
+  function acierto(u) {
+    const pts = valorActual();
+    V.puntos[u] = (V.puntos[u] || 0) + pts;
+    V.ganador = u; V.ganador_pts = pts; V.revelado = true; V.basta = null; V.intento = null;
+    Sonido.reproducir('exito'); lluvia(['🎶', '🔔', '⭐'], 25); destello();
+    pintar();
+    Sonido.decir(`¡Correcto, ${nombre(u)}! ${V.acertijos[V.idx].r}.`);
+  }
+  function fallo(u, texto) {
+    V.fuera.add(u); V.basta = null; V.intento = { u, t: texto };
+    Sonido.reproducir('tache');
+    if (V.participantes.filter(enLinea).every(p => V.fuera.has(p))) { V.revelado = true; Sonido.decir(`Nadie le atinó. Era: ${V.acertijos[V.idx].r}`); }
+    pintar();
   }
   function mensaje(u, m) {
-    if (m.t !== 'basta' || !V || V.basta || V.revelado || V.fuera.has(u) || !V.participantes.includes(u)) return;
-    V.basta = u;
-    Sonido.reproducir('timbre'); destello();
-    pintar();
-    Sonido.decir(`¡${nombre(u)}!`);
+    if (!V) return;
+    if (m.t === 'basta' && !V.basta && !V.revelado && !V.fuera.has(u) && V.participantes.includes(u)) {
+      V.basta = u; V.intento = null;
+      Sonido.reproducir('timbre');
+      pintar();
+      Sonido.decir(`¡${nombre(u)}!`);
+      return;
+    }
+    if (m.t === 'respuesta' && V.basta === u && m.id === 'v' + V.idx) {
+      const t = String(m.texto || '').trim().slice(0, 60);
+      if (!t) return;
+      if (esCorrecta(t, V.acertijos[V.idx].r)) acierto(u); else fallo(u, t);
+    }
   }
   return { config };
 })();

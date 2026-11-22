@@ -146,10 +146,10 @@ function vistaEscribir(v) {
       <div class="tarjeta frase-cel">${escaparHTML(v.frase).replace(/_{3,}/g, '<span class="hueco">&nbsp;</span>')}</div>
       ${v.error ? `<p class="centro aparecer" style="color:var(--naranja2);font-weight:900;margin:0">${escaparHTML(v.error)}</p>` : ''}
       <form id="f" autocomplete="off" style="display:flex;flex-direction:column;gap:1rem">
-        <textarea id="resp" maxlength="${v.max || 80}" rows="3" placeholder="${v.instr ? 'Tu mentira… 😈' : 'Escribe algo chistoso… 😏'}" class="campo-texto"></textarea>
+        <textarea id="resp" maxlength="${v.max || 80}" rows="${v.sinTip ? 2 : 3}" ${v.minusculas || v.sinTip ? 'autocapitalize="none" autocorrect="off" spellcheck="false"' : ''} placeholder="${v.sinTip ? 'Escribe el título…' : v.instr ? 'Tu mentira… 😈' : 'Escribe algo chistoso… 😏'}" class="campo-texto"></textarea>
         <div class="fila entre"><span class="tenue" id="cuenta">0/${v.max || 80}</span><button class="btn grande" type="submit">Enviar 🚀</button></div>
       </form>
-      <p class="tenue centro" style="font-size:.95rem">${v.instr ? 'Tip: que suene creíble para que caigan 😏' : 'Tip: la gracia es que nadie sepa que fuiste tú 😇'}</p>
+      ${v.sinTip ? '<p class="tenue centro" style="font-size:.95rem">No importan las faltas de ortografía 😉</p>' : `<p class="tenue centro" style="font-size:.95rem">${v.instr ? 'Tip: que suene creíble para que caigan 😏' : 'Tip: la gracia es que nadie sepa que fuiste tú 😇'}</p>`}
     </div>`);
   const t = document.getElementById('resp');
   const c = document.getElementById('cuenta');
