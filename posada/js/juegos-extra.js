@@ -240,7 +240,7 @@ const Probable = (() => {
     ], '¿Quién es más probable? Sale una pregunta y cada quien vota en secreto por alguien del grupo. Luego la tele revela quién ganó, y quién votó por quién. Si votas con la mayoría, ganas puntos.', () => {
       Q = { candidatos: ps, preguntas: tomarAlAzar(PREGUNTAS_PROBABLE, 'usadasProbable', cfg.preguntas), idx: 0, puntos: {}, coronas: {} };
       ps.forEach(u => { Q.puntos[u] = 0; Q.coronas[u] = 0; });
-      Juego.iniciar({ llego, mensaje, salio: () => { } });
+      Juego.iniciar({ llego, mensaje, salio: () => { } , puntos: puntosDe('¿Quién es más probable?', () => Q.puntos) });
       pregunta();
     })
   });
@@ -324,7 +324,7 @@ const Mentiras = (() => {
     ], 'Mentiras navideñas. Sale un dato real con un hueco. Cada quien escribe una mentira creíble. Luego todos tienen que encontrar la verdad entre las mentiras. Si alguien cae en tu mentira, ganas puntos.', () => {
       M = { participantes: ps, preguntas: tomarAlAzar(PREGUNTAS_MENTIRAS, 'usadasMentiras', cfg.preguntas), idx: 0, puntos: {}, tiempo: cfg.tiempo };
       ps.forEach(u => M.puntos[u] = 0);
-      Juego.iniciar({ llego, mensaje, salio: () => { } });
+      Juego.iniciar({ llego, mensaje, salio: () => { } , puntos: puntosDe('Mentiras Navideñas', () => M.puntos) });
       escribir();
     })
   });
@@ -475,7 +475,7 @@ const Villancico = (() => {
     ], 'Adivina el villancico. Aparecen emojis en la tele. Si sabes cuál es, aprieta basta en tu celular y dilo en voz alta. Si fallas, quedas fuera de ese acertijo.', () => {
       V = { participantes: ps, acertijos: tomarAlAzar(ACERTIJOS_EMOJI, 'usadasVillancico', cfg.acertijos), idx: 0, puntos: {} };
       ps.forEach(u => V.puntos[u] = 0);
-      Juego.iniciar({ llego: u => ponerVista(u, vistaPara(u)), mensaje, salio: () => { } });
+      Juego.iniciar({ llego: u => ponerVista(u, vistaPara(u)), mensaje, salio: () => { } , puntos: puntosDe('Adivina el Villancico', () => V.puntos) });
       acertijo();
     })
   });
@@ -556,7 +556,7 @@ const Pinata = (() => {
     ], 'Rompe la piñata. Cuando la tele diga dale, toca el botón de tu celular lo más rápido que puedas. El que dé el golpe final se lleva la piñata.', () => {
       Pi = { participantes: ps, rondas: cfg.rondas, ronda: 0, puntos: {} };
       ps.forEach(u => Pi.puntos[u] = 0);
-      Juego.iniciar({ llego: u => ponerVista(u, vistaPara(u)), mensaje, salio: () => { } });
+      Juego.iniciar({ llego: u => ponerVista(u, vistaPara(u)), mensaje, salio: () => { } , puntos: puntosDe('Rompe la Piñata', () => Pi.puntos) });
       ronda();
     })
   });

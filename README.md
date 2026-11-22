@@ -64,6 +64,12 @@ Carrera de toques: todos le pegan desde su celular lo más rápido que puedan.
 
 En todos los juegos con puntos, al final el 🥇 recibe +3, el 🥈 +2 y el 🥉 +1 en el marcador de la noche.
 
+### ✏️ Corregir puntos
+Si alguien se equivocó al votar o quieres premiar o castigar a alguien, toca **✏️ Puntos** en la barra de arriba (está en todas las pantallas) o **✏️ Corregir puntos** en el menú.
+- Se abre una ventana encima del juego, sin interrumpirlo.
+- Puedes escribir el número exacto o usar −5, −1, +1 y +5.
+- Corriges los puntos **del juego en curso** (en 100 Posaderos, los de cada equipo y el banco de la ronda) y los del **marcador de la noche** de cada persona.
+
 **Marcador → 👑 Coronación** para coronar al Rey o Reina de la Posada.
 
 ### 🗓️ Orden sugerido para la posada

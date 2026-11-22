@@ -211,3 +211,27 @@ body.celular input[type=text] { -webkit-user-select: text; user-select: text; }
 .boton-dale { font-size: 2.6rem; user-select: none; -webkit-user-select: none; }
 .boton-dale.golpe { animation: golpe .12s; }
 @keyframes golpe { 50% { transform: scale(.92) rotate(-4deg); } }
+
+/* ---------- ✏️ Corregir puntos ---------- */
+.fondo-corrector {
+  position: fixed; inset: 0; z-index: 80; background: rgba(0, 0, 0, .7);
+  display: grid; place-items: center; padding: 2vmin;
+  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+}
+.ventana-corrector {
+  width: min(1000px, 100%); max-height: 94vh; overflow: auto;
+  background: #0c2a1a; border: 2px solid var(--naranja2); border-radius: 22px; padding: 2vmin 2.5vmin;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .6);
+}
+.lista-corrector { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(430px, 100%), 1fr)); gap: .6rem; }
+.fila-corrector {
+  display: flex; justify-content: space-between; align-items: center; gap: .6em;
+  background: var(--tarjeta); border-radius: 14px; padding: .5em .7em; font-weight: 800;
+}
+.fila-corrector .quien { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.valor-corrector {
+  width: 4.5em; text-align: center; font-family: inherit; font-weight: 900; font-size: 1.15rem;
+  padding: .35em; border-radius: 10px; border: 2px solid var(--borde); background: rgba(0, 0, 0, .35); color: var(--naranja2);
+  -webkit-user-select: text; user-select: text;
+}
+.valor-corrector:focus { outline: none; border-color: var(--naranja2); }

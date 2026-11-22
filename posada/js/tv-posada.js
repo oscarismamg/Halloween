@@ -59,10 +59,91 @@ function barra(titulo, conSalir = true) {
     <div class="titulo-juego">${titulo}</div>
     <div class="fila" style="gap:.6em">
       <span class="etiqueta">Sala <b>${P.sala}</b> · ${conectados().length} 📱</span>
+      <button class="btn secundario chico" data-g="corregir">✏️ Puntos</button>
       ${conSalir ? '<button class="btn secundario chico" data-a="salir">✕ Salir</button>' : ''}
     </div>
   </div>`;
 }
+/* =========================================================
+   ✏️ CORREGIR PUNTOS (ventana encima de cualquier pantalla)
+   Cada juego puede exponer sus puntos con Juego.actual.puntos =
+   { titulo, filas: () => [{ id, etiqueta, valor }], poner(id, valor) }
+   ========================================================= */
+const Corrector = (() => {
+  let caja = null;
+  function filasNoche() {
+    return P.orden.filter(u => J(u)).map(u => ({ id: u, etiqueta: ficha(u), valor: J(u).puntos || 0 }));
+  }
+  function fila(tipo, f) {
+    return `<div class="fila-corrector">
+      <span class="quien">${f.etiqueta}</span>
+      <span class="fila" style="gap:.35em;flex-wrap:nowrap">
+        <button class="btn secundario chico" data-m="sumar" data-t="${tipo}" data-id="${escaparHTML(f.id)}" data-n="-5">−5</button>
+        <button class="btn secundario chico" data-m="sumar" data-t="${tipo}" data-id="${escaparHTML(f.id)}" data-n="-1">−1</button>
+        <input type="number" inputmode="numeric" class="valor-corrector" data-t="${tipo}" data-id="${escaparHTML(f.id)}" value="${f.valor}">
+        <button class="btn secundario chico" data-m="sumar" data-t="${tipo}" data-id="${escaparHTML(f.id)}" data-n="1">+1</button>
+        <button class="btn secundario chico" data-m="sumar" data-t="${tipo}" data-id="${escaparHTML(f.id)}" data-n="5">+5</button>
+      </span>
+    </div>`;
+  }
+  function juegoPuntos() { return Juego.actual && Juego.actual.puntos ? Juego.actual.puntos : null; }
+  function pintar() {
+    if (!caja) return;
+    const jp = juegoPuntos();
+    caja.querySelector('.ventana-corrector').innerHTML = `
+      <div class="fila entre"><h2 style="margin:0">✏️ Corregir puntos</h2><button class="btn" data-m="cerrar">✔ Listo</button></div>
+      ${jp ? `<h3>🎮 ${jp.titulo}</h3><div class="lista-corrector">${jp.filas().map(f => fila('juego', f)).join('')}</div>` : ''}
+      <h3>🏆 Marcador de la noche</h3>
+      <div class="lista-corrector">${filasNoche().map(f => fila('noche', f)).join('') || '<p class="tenue">Sin jugadores todavía</p>'}</div>
+      <p class="tenue" style="margin:.5em 0 0">Los cambios se guardan al momento. El juego sigue corriendo detrás.</p>`;
+  }
+  function poner(tipo, id, valor) {
+    valor = Math.round(Number(valor));
+    if (!Number.isFinite(valor)) return;
+    if (tipo === 'noche') { if (J(id)) { J(id).puntos = Math.max(0, valor); guardar(); } }
+    else { const jp = juegoPuntos(); if (jp) { const f = jp.filas().find(x => String(x.id) === String(id)); if (f) jp.poner(f.id, valor); } }
+  }
+  function valorActual(tipo, id) {
+    const lista = tipo === 'noche' ? filasNoche() : (juegoPuntos() ? juegoPuntos().filas() : []);
+    const f = lista.find(x => String(x.id) === String(id));
+    return f ? f.valor : 0;
+  }
+  function abrir() {
+    if (caja) return pintar();
+    caja = document.createElement('div');
+    caja.className = 'fondo-corrector';
+    caja.innerHTML = '<div class="ventana-corrector"></div>';
+    document.body.appendChild(caja);
+    caja.addEventListener('click', ev => {
+      if (ev.target === caja) return cerrar();
+      const b = ev.target.closest('[data-m]');
+      if (!b) return;
+      if (b.dataset.m === 'cerrar') return cerrar();
+      if (b.dataset.m === 'sumar') { poner(b.dataset.t, b.dataset.id, valorActual(b.dataset.t, b.dataset.id) + Number(b.dataset.n)); Sonido.reproducir('tic'); pintar(); }
+    });
+    caja.addEventListener('change', ev => {
+      const i = ev.target.closest('.valor-corrector');
+      if (i) { poner(i.dataset.t, i.dataset.id, i.value); pintar(); }
+    });
+    pintar();
+  }
+  function cerrar() {
+    if (!caja) return;
+    caja.remove(); caja = null;
+    if (pantallaActual === 'marcador') pantallaMarcador();
+  }
+  return { abrir };
+})();
+document.addEventListener('click', ev => { if (ev.target.closest('[data-g="corregir"]')) { ev.preventDefault(); Corrector.abrir(); } });
+// Puntos de un juego guardados en un objeto { uid: puntos }
+function puntosDe(titulo, obtener) {
+  return {
+    titulo,
+    filas: () => Object.keys(obtener()).map(u => ({ id: u, etiqueta: ficha(u), valor: obtener()[u] })),
+    poner: (u, v) => { obtener()[u] = v; }
+  };
+}
+
 function confirmarSalida() { if (confirm('¿Terminar este juego y volver al menú?')) { Juego.terminar(); menu(); } }
 
 function destello() { const d = document.createElement('div'); d.className = 'destello'; document.body.appendChild(d); setTimeout(() => d.remove(), 800); }
@@ -219,6 +300,7 @@ function menu() {
       </div>
       <div class="fila">
         <button class="btn secundario" data-a="marcador">🏆 Marcador</button>
+        <button class="btn secundario" data-g="corregir">✏️ Corregir puntos</button>
         <button class="btn secundario" data-a="ajustes">⚙️ Ajustes</button>
       </div>
     </div>`, {
@@ -370,7 +452,21 @@ const Posaderos = (() => {
       F = { conductor: cfg.conductor, equipos: NOMBRES_EQ.map(e => ({ ...e, miembros: [], pts: 0, turno: 0 })), rondas: cfg.rondas, ronda: 0, R: null };
       ids.forEach((u, i) => F.equipos[i % 2].miembros.push(u));
     }
-    Juego.iniciar({ llego: llegoPos, mensaje: mensajePos, refrescar: () => { } });
+    Juego.iniciar({
+      llego: llegoPos, mensaje: mensajePos, refrescar: () => { },
+      puntos: {
+        titulo: '100 Posaderos (equipos)',
+        filas: () => [
+          ...F.equipos.map((e, i) => ({ id: 'eq' + i, etiqueta: `${e.emoji} ${e.nombre}`, valor: e.pts })),
+          ...(F.R && F.R.fase !== 'fin' ? [{ id: 'banco', etiqueta: '💰 Banco de esta ronda', valor: F.R.banco }] : [])
+        ],
+        poner: (id, v) => {
+          if (id === 'banco') { if (F.R) F.R.banco = Math.max(0, v); }
+          else F.equipos[+String(id).slice(2)].pts = Math.max(0, v);
+          if (pantallaActual === 'pos-tablero') pintar();
+        }
+      }
+    });
     pantalla('pos-equipos', `
       ${barra('🎯 Equipos')}
       <div class="contenido">
@@ -701,7 +797,7 @@ const Chuscas = (() => {
     ], 'Respuestas chuscas. A cada quien le llegan dos frases a su celular. Complétalas con lo más chistoso que se te ocurra. Luego se enfrentan las respuestas en la tele y todos votan. Si te llevas todos los votos, es un chuscazo.', () => {
       C = { participantes: barajar(participantesSel()), ronda: 1, puntos: {} };
       C.participantes.forEach(u => C.puntos[u] = 0);
-      Juego.iniciar({ llego: llegoCh, mensaje: mensajeCh, salio: () => { }, refrescar: () => { } });
+      Juego.iniciar({ llego: llegoCh, mensaje: mensajeCh, salio: () => { }, refrescar: () => { }, puntos: puntosDe('Respuestas Chuscas', () => C.puntos) });
       rondaEscribir();
     });
   }
