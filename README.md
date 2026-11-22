@@ -69,7 +69,8 @@ En todos los juegos con puntos, al final el 🥇 recibe +3, el 🥈 +2 y el 🥉
 
 ### 🎲 Dado de Regalos (intercambio con robo)
 Dado gigante en 3D para dinámicas de robar e intercambiar regalos. Cada quien trae 1 regalo de broma y 1 regalo bueno.
-- **Dinámicas listas:** 🤡 *Broma Bomba* (regalos de broma, se abren al tomarlos), 🎁 *El Gran Robo* (regalos buenos, se abren al final), ⚖️ *Par toma, impar roba* y 🎲 *Solo el dado*. Puedes **editar el texto de cada cara**.
+- **Regalo Misterioso (recomendada si los regalos van revueltos):** nadie tiene más de 2 regalos; si robas o tomas teniendo 2, entregas uno tuyo. En la *Fase 1* todo va cerrado y el 6 obliga a abrir un regalo frente a todos, para ir revelando cuáles son buenos. Cuando se vacía el centro, todos abren y viene la *Revancha* con ronda relámpago para cambiar bromas por regalos buenos (el 6 da un 🔒 candado).
+- **Otras dinámicas:** 🤡 *Broma Bomba* (regalos de broma, se abren al tomarlos), 🎁 *El Gran Robo* (regalos buenos, se abren al final), ⚖️ *Par toma, impar roba* y 🎲 *Solo el dado*. Puedes **editar el texto de cada cara**.
 - **Turnos:** con turnos activados, la TV dice a quién le toca y **esa persona tira desde su celular** (o se tira desde la TV). El que sigue recibe un aviso.
 - **⏱️ Ronda relámpago:** 3 minutos de tiros rápidos; al sonar la alarma, cada quien se queda con el regalo que tiene en las manos.
 - **Reglas de candado sugeridas:** un regalo robado 3 veces queda congelado 🔒 y no se vale robar de regreso en el turno inmediato.

@@ -5,6 +5,14 @@
 JUEGOS.push({ id: 'dado', icono: '🎲', nombre: 'Dado de Regalos', desc: 'Dado gigante para robar regalos' });
 
 const DINAMICAS_DADO = {
+  misterio: {
+    nombre: '🎁 Regalo Misterioso · Fase 1', desc: 'Regalos revueltos y cerrados · máx. 2 por persona',
+    caras: ['🎁 Toma uno del CENTRO', '🎁 Toma uno del CENTRO', '🦹 ROBA uno cerrado (si ya tienes 2, entrega uno tuyo)', '⬅️ Cambia uno con tu IZQUIERDA', '🔄 TODOS pasan un regalo a la izquierda', '🎉 ¡ABRE uno de tus regalos frente a todos!']
+  },
+  revancha: {
+    nombre: '🔥 Regalo Misterioso · Revancha', desc: 'Ya abiertos: cambia tus bromas por algo bueno',
+    caras: ['🦹 ROBA un regalo abierto y entrega uno tuyo a cambio', '😬 Nada… ¡suerte para la próxima!', '🔀 Cambia tu PEOR regalo con quien tú quieras', '⬅️ Cambia uno con tu IZQUIERDA', '➡️ Cambia uno con tu DERECHA', '🔒 CANDADO: protege uno de tus regalos hasta el final']
+  },
   broma: {
     nombre: '🤡 Broma Bomba', desc: 'Regalos de broma, se abren al tomarlos',
     caras: ['🎁 Toma uno del centro y ÁBRELO frente a todos', '😈 REGALA el tuyo a quien tú elijas', '🦹 ROBA un regalo ya abierto', '⬅️ Cambia con quien está a tu IZQUIERDA', '➡️ Cambia con quien está a tu DERECHA', '👑 ¡Tú decides! Cualquiera de las anteriores']
@@ -32,7 +40,7 @@ const DadoRegalos = (() => {
   }
 
   function config() {
-    if (!cfg) cfg = { sel: new Set(conectados()), dinamica: 'broma', turnos: true, celular: true };
+    if (!cfg) cfg = { sel: new Set(conectados()), dinamica: 'misterio', turnos: true, celular: true };
     pintarConfig();
   }
   function pintarConfig() {
