@@ -67,6 +67,14 @@ Carrera de toques: todos le pegan desde su celular lo más rápido que puedan.
 
 En todos los juegos con puntos, al final el 🥇 recibe +3, el 🥈 +2 y el 🥉 +1 en el marcador de la noche.
 
+### 🎲 Dado de Regalos (intercambio con robo)
+Dado gigante en 3D para dinámicas de robar e intercambiar regalos. Cada quien trae 1 regalo de broma y 1 regalo bueno.
+- **Dinámicas listas:** 🤡 *Broma Bomba* (regalos de broma, se abren al tomarlos), 🎁 *El Gran Robo* (regalos buenos, se abren al final), ⚖️ *Par toma, impar roba* y 🎲 *Solo el dado*. Puedes **editar el texto de cada cara**.
+- **Turnos:** con turnos activados, la TV dice a quién le toca y **esa persona tira desde su celular** (o se tira desde la TV). El que sigue recibe un aviso.
+- **⏱️ Ronda relámpago:** 3 minutos de tiros rápidos; al sonar la alarma, cada quien se queda con el regalo que tiene en las manos.
+- **Reglas de candado sugeridas:** un regalo robado 3 veces queda congelado 🔒 y no se vale robar de regreso en el turno inmediato.
+- **Orden sugerido:** primero *Broma Bomba* para calentar y luego *El Gran Robo* con los regalos de $200, cerrando con la ronda relámpago.
+
 ### 🤖 Jugadores de prueba
 ¿Quieres probar un juego y no tienes suficientes celulares? En el menú toca **🤖 + Jugador de prueba** una o varias veces.
 - Los robots juegan solos: aprietan ¡BASTA!, escriben respuestas chistosas, votan, marcan su tabla de lotería y le pegan a la piñata.

@@ -99,6 +99,7 @@ function render() {
   if (v.tipo === 'conductor') return vistaConductor(v);
   if (v.tipo === 'tabla') return vistaTabla(v);
   if (v.tipo === 'dale') return vistaDale(v);
+  if (v.tipo === 'dado') return vistaDadoCel(v);
 }
 
 function vistaEspera(v) {
@@ -252,6 +253,24 @@ function vistaDale(v) {
     if (!vista || vista.tipo !== 'dale' || !vista.activo) { clearInterval(timerGolpes); return; }
     if (golpesPendientes > 0) { const n = Math.min(golpesPendientes, 6); golpesPendientes -= n; RedCel.enviar({ t: 'golpes', id: v.id, n }); }
   }, 200);
+}
+
+/* ---------------- Dado: botón para tirar ---------------- */
+function vistaDadoCel(v) {
+  pintar(`
+    <div class="contenido centro">
+      <h2>${escaparHTML(v.titulo || '¡Te toca!')}</h2>
+      <button class="boton-basta boton-dado-cel" data-a="tirar">🎲<br>¡TIRAR!</button>
+      <p class="tenue">El dado rueda en la TV 📺</p>
+    </div>`, {
+    tirar: () => {
+      if (enviadoSeq === v.seq) return;
+      enviadoSeq = v.seq;
+      RedCel.enviar({ t: 'tirar' });
+      vibrar([40, 30, 40, 30, 120]);
+      const b = document.querySelector('.boton-dado-cel'); if (b) { b.classList.add('inactivo'); b.innerHTML = '🎲'; }
+    }
+  });
 }
 
 /* ---------------- Arranque ---------------- */

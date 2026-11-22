@@ -1078,6 +1078,7 @@ const Bots = (() => {
     else if (v.tipo === 'escribir') despues(uid, azar(2500, 7000), () => mandar({ t: 'respuesta', id: v.id, texto: textoPara(v) }));
     else if (v.tipo === 'votar' && v.opciones && v.opciones.length) despues(uid, azar(1500, 5000), () => mandar({ t: 'voto', id: v.id, k: elegir(v.opciones).k }));
     else if (v.tipo === 'tabla' && v.botMarcadas) despues(uid, azar(1500, 3500), () => mandar({ t: 'loteria', id: v.id, marcadas: v.botMarcadas, bot: true }));
+    else if (v.tipo === 'dado') despues(uid, azar(1500, 3500), () => mandar({ t: 'tirar' }));
     else if (v.tipo === 'dale' && v.activo) guardarTimer(uid, setInterval(() => { if (!vigente()) return limpiar(uid); manejarMensaje(uid, { t: 'golpes', id: v.id, n: azar(1, 4) }); }, 300));
   }
   return { agregar, quitarTodos, recibir, limpiar };

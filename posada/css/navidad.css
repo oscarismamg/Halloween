@@ -257,3 +257,45 @@ body.celular { background-attachment: scroll; min-height: 100vh; }
 .letra-v.oculta { color: transparent; }
 .letra-v.nueva { animation: aparecer .5s ease both; }
 .hueco-palabra { width: .9em; }
+
+/* ---------- 🎲 Dado de Regalos ---------- */
+.dado-layout { display: grid; grid-template-columns: 1fr 1.2fr; gap: 3vmin; align-items: center; }
+@media (orientation: portrait) { .dado-layout { grid-template-columns: 1fr; } }
+.col-dado { display: flex; flex-direction: column; align-items: center; gap: 2vmin; }
+.col-leyenda { display: flex; flex-direction: column; gap: 1.4vmin; }
+.turno-dado { font-size: clamp(1.1rem, 3.4vmin, 2.2rem); font-weight: 800; text-align: center; min-height: 1.4em; }
+.escena-dado { --t: min(30vmin, 55vw); width: var(--t); height: var(--t); perspective: 1200px; margin: 3vmin 0; }
+.dado { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 1.6s cubic-bezier(.15, .9, .25, 1); }
+.dado.girando { filter: drop-shadow(0 0 30px rgba(255, 211, 107, .6)); }
+.cara-dado {
+  position: absolute; inset: 0; border-radius: 16%;
+  background: radial-gradient(circle at 30% 25%, #fff, #f1e6d0 70%, #d9c7a3);
+  box-shadow: inset 0 0 calc(var(--t) * .08) rgba(0, 0, 0, .25);
+  display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); padding: 14%; gap: 4%;
+  backface-visibility: hidden; border: 2px solid #c9b48a;
+}
+.cara-dado span { display: block; }
+.cara-dado span.pip { border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ff6b6b, #b30000); box-shadow: inset 0 2px 4px rgba(0, 0, 0, .4); }
+.cara-dado.c1 span.pip { background: radial-gradient(circle at 35% 30%, #ff8a8a, #c40000); transform: scale(1.35); }
+.c1 { transform: translateZ(calc(var(--t) / 2)); }
+.c2 { transform: rotateY(90deg) translateZ(calc(var(--t) / 2)); }
+.c3 { transform: rotateX(90deg) translateZ(calc(var(--t) / 2)); }
+.c4 { transform: rotateX(-90deg) translateZ(calc(var(--t) / 2)); }
+.c5 { transform: rotateY(-90deg) translateZ(calc(var(--t) / 2)); }
+.c6 { transform: rotateY(180deg) translateZ(calc(var(--t) / 2)); }
+.resultado-dado { font-weight: 900; font-size: clamp(1.4rem, 5vmin, 3.4rem); line-height: 1.15; min-height: 2.4em; display: flex; align-items: center; color: var(--naranja2); }
+.num-grande { display: inline-grid; place-items: center; width: 1.6em; height: 1.6em; border-radius: 22%; background: #fff; color: #b30000; margin-right: .3em; flex: none; }
+.leyenda-dado { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; }
+.leyenda-dado.tv { grid-template-columns: 1fr; gap: .8vmin; }
+.cara-leyenda {
+  display: flex; gap: .7em; align-items: center; text-align: left; font-family: inherit; font-weight: 800;
+  font-size: clamp(.9rem, 2.4vmin, 1.5rem); color: var(--texto);
+  background: var(--tarjeta); border: 2px solid var(--borde); border-radius: 14px; padding: .5em .8em; cursor: pointer;
+  transition: transform .2s, background .2s;
+}
+.cara-leyenda.activa { background: rgba(255, 211, 107, .22); border-color: var(--naranja2); transform: scale(1.03); box-shadow: 0 0 25px rgba(255, 211, 107, .4); }
+.num-cara { flex: none; width: 1.8em; height: 1.8em; border-radius: 22%; display: grid; place-items: center; background: #fff; color: #b30000; font-weight: 900; }
+.reloj-relampago { font-weight: 900; font-size: clamp(1.2rem, 3.6vmin, 2.4rem); color: var(--naranja2); }
+.reloj-relampago.urgente { color: var(--rojo); animation: latir .5s ease-in-out infinite alternate; }
+.juego-boton.elegida-din { border-color: var(--naranja2); background: rgba(255, 211, 107, .18); }
+.boton-dado-cel { font-size: 2.8rem; }
