@@ -235,3 +235,18 @@ body.celular input[type=text] { -webkit-user-select: text; user-select: text; }
   -webkit-user-select: text; user-select: text;
 }
 .valor-corrector:focus { outline: none; border-color: var(--naranja2); }
+
+/* ---------- Muchas respuestas (hasta 15 jugadores) ---------- */
+.respuestas-chuscas.compactas { grid-template-columns: repeat(4, 1fr); gap: 1vmin; }
+.respuestas-chuscas.compactas .resp-chusca { font-size: clamp(.8rem, 2vmin, 1.25rem); padding: 1vmin 1.2vmin; gap: .6em; border-radius: 14px; box-shadow: 0 4px 0 #c9a24a; }
+.respuestas-chuscas.compactas .resp-chusca.ganadora { box-shadow: 0 4px 0 #e6a400, 0 0 30px rgba(255, 211, 107, .9); }
+.respuestas-chuscas.compactas .letra-resp { width: 1.6em; height: 1.6em; }
+.respuestas-chuscas.compactas .autor { font-size: .75em; margin-top: .25em; }
+.respuestas-chuscas.compactas .votantes { font-size: .8em; }
+.respuestas-chuscas.compactas .barra-votos { height: .35em; margin-top: .25em; }
+@media (orientation: portrait) { .respuestas-chuscas.compactas { grid-template-columns: repeat(2, 1fr); } }
+.barras-votos.dos { display: grid; grid-template-columns: 1fr 1fr; column-gap: 3vmin; max-width: 1400px; }
+.barras-votos.dos .fila-barra { grid-template-columns: minmax(7em, 1.2fr) 1.5fr minmax(3em, .8fr); font-size: clamp(.85rem, 2.2vmin, 1.4rem); }
+/* Que el fondo no se corte en listas largas del celular */
+html, body { background-color: #04100a; }
+body.celular { background-attachment: scroll; min-height: 100vh; }

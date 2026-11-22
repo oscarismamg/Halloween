@@ -876,7 +876,7 @@ const Chuscas = (() => {
       ${barra(d.final ? '🌶️ Ronda final' : `😂 Ronda ${C.ronda} · Duelo ${C.idx + 1} de ${C.ordenDuelos.length}`)}
       <div class="contenido" style="gap:1.6vh">
         <div class="frase-chusca">${escaparHTML(d.frase).replace(/_{3,}/g, '<span class="hueco">&nbsp;</span>')}</div>
-        <div class="respuestas-chuscas ${opciones.length > 2 ? 'muchas' : ''}">
+        <div class="respuestas-chuscas ${opciones.length > 2 ? 'muchas' : ''} ${opciones.length > 9 ? 'compactas' : ''}">
           ${opciones.map(o => `<div class="resp-chusca aparecer"><span class="letra-resp">${o.letra}</span><span>${escaparHTML(o.texto)}</span></div>`).join(opciones.length === 2 ? '<div class="vs">VS</div>' : '')}
         </div>
         <div class="fila entre" style="align-items:center">
@@ -920,7 +920,7 @@ const Chuscas = (() => {
       ${barra(d.final ? '🌶️ Ronda final' : `😂 Ronda ${C.ronda} · Duelo ${C.idx + 1} de ${C.ordenDuelos.length}`)}
       <div class="contenido" style="gap:1.4vh">
         <div class="frase-chusca">${escaparHTML(d.frase).replace(/_{3,}/g, '<span class="hueco">&nbsp;</span>')}</div>
-        <div class="respuestas-chuscas ${d.opciones.length > 2 ? 'muchas' : ''}">
+        <div class="respuestas-chuscas ${d.opciones.length > 2 ? 'muchas' : ''} ${d.opciones.length > 9 ? 'compactas' : ''}">
           ${ordenadas.map(o => {
       const n = conteo[o.k].length, pct = total ? Math.round(n / total * 100) : 0;
       return `<div class="resp-chusca ${chuscazo === o.k ? 'ganadora' : ''}">

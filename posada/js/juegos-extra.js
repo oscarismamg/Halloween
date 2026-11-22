@@ -279,8 +279,10 @@ const Probable = (() => {
       ${barra(`👉 Pregunta ${Q.idx + 1} de ${Q.preguntas.length}`)}
       <div class="contenido" style="gap:1.4vh">
         <div class="frase-chusca" style="font-size:clamp(1.1rem,3.6vmin,2.4rem)">${escaparHTML(Q.preguntas[Q.idx])}</div>
-        ${ganadores.length ? `<h1 class="aparecer" style="margin:0">👑 ${ganadores.map(ficha).join(' y ')}</h1>` : '<h2>Nadie votó 🦗</h2>'}
-        <div class="barras-votos">
+        ${!ganadores.length ? '<h2>Nadie votó 🦗</h2>'
+        : ganadores.length <= 3 ? `<h1 class="aparecer" style="margin:0">👑 ${ganadores.map(ficha).join(' y ')}</h1>`
+          : `<h2 class="aparecer" style="margin:0">🤝 ¡Empate entre ${ganadores.length}! Cada quien con ${max} ${max === 1 ? 'voto' : 'votos'}</h2>`}
+        <div class="barras-votos ${orden.length > 6 ? 'dos' : ''}">
           ${orden.map(u => `<div class="fila-barra"><span class="quien">${ficha(u)}</span>
             <div class="barra-votos grande"><div style="width:${Math.round(conteo[u].length / total * 100)}%"></div></div>
             <span class="votantes">${conteo[u].map(v => J(v) ? J(v).emoji : '').join(' ')}</span></div>`).join('')}
@@ -289,7 +291,7 @@ const Probable = (() => {
         <div class="fila"><button class="btn grande" data-a="sig">${Q.idx + 1 >= Q.preguntas.length ? '🏆 Resultados' : 'Siguiente ▶'}</button></div>
       </div>`, { salir: confirmarSalida, sig: () => { Q.idx++; pregunta(); } });
     conectados().forEach(u => vistaEspera(u, ganadores.includes(u) ? '👑 ¡Fuiste tú!' : 'Resultados en la TV 📺', ganadores.includes(u) ? 'El pueblo ha hablado 😂' : (ganadores.includes(Q.votos[u]) ? '¡Le atinaste! +100' : 'No votaste con la mayoría'), ganadores.includes(u) ? '👑' : '👀'));
-    if (ganadores.length) { Sonido.reproducir('redoble', 1.5); setTimeout(() => Sonido.decir(`¡${ganadores.map(nombre).join(' y ')}!`), 1600); destello(); }
+    if (ganadores.length) { Sonido.reproducir('redoble', 1.5); setTimeout(() => Sonido.decir(ganadores.length <= 3 ? `¡${ganadores.map(nombre).join(' y ')}!` : `¡Empate entre ${ganadores.length} personas!`), 1600); destello(); }
   }
 
   function llego(u) {
@@ -377,7 +379,7 @@ const Mentiras = (() => {
       <div class="contenido" style="gap:1.4vh">
         <div class="frase-chusca" style="font-size:clamp(1.1rem,3.8vmin,2.6rem)">${frase(q)}</div>
         <h3 class="centro" style="margin:0">🕵️ ¿Cuál es la VERDAD? Voten en su celular</h3>
-        <div class="respuestas-chuscas muchas">${M.opciones.map(o => `<div class="resp-chusca aparecer"><span class="letra-resp">${o.letra}</span><span>${escaparHTML(o.texto)}</span></div>`).join('')}</div>
+        <div class="respuestas-chuscas muchas ${M.opciones.length > 9 ? 'compactas' : ''}">${M.opciones.map(o => `<div class="resp-chusca aparecer"><span class="letra-resp">${o.letra}</span><span>${escaparHTML(o.texto)}</span></div>`).join('')}</div>
         <div class="fila entre"><div id="reloj" class="reloj" style="font-size:clamp(2.5rem,9vmin,5rem)"></div>
           <span class="narracion" style="font-size:clamp(1rem,3vmin,2rem)"><span id="votosCuenta">0</span>/${conectados().length} votos</span>
           <button class="btn secundario" data-a="ya">⏩ Revelar</button></div>
@@ -406,7 +408,7 @@ const Mentiras = (() => {
       ${barra(`🤥 Pregunta ${M.idx + 1} de ${M.preguntas.length}`)}
       <div class="contenido" style="gap:1.2vh">
         <div class="frase-chusca" style="font-size:clamp(1rem,3.4vmin,2.3rem)">${escaparHTML(q.p).replace(/_{3,}/g, `<span class="verdad-txt">${escaparHTML(q.v)}</span>`)}</div>
-        <div class="respuestas-chuscas muchas">${orden.map(o => {
+        <div class="respuestas-chuscas muchas ${orden.length > 9 ? 'compactas' : ''}">${orden.map(o => {
       const quienes = elecciones[o.k] || [];
       return `<div class="resp-chusca ${o.verdad ? 'ganadora' : ''}">
             <span class="letra-resp">${o.letra}</span>
